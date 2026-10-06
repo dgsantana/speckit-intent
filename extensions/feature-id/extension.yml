@@ -1,0 +1,43 @@
+schema_version: "1.0"
+
+extension:
+  id: feature-id
+  name: "Dated Feature IDs"
+  version: "0.1.0"
+  description: "Feature directories named <yyyyMMdd>-<hash>-<slug>, the hash derived from the name by a script, so people on separate branches never collide by allocation order"
+  author: "Daniel Santana"
+  repository: https://github.com/dgsantana/speckit-intent
+  license: MIT
+
+requires:
+  speckit_version: ">=1.0.4"
+
+provides:
+  commands:
+    - name: speckit.feature-id.allocate
+      file: commands/speckit.feature-id.allocate.md
+      description: "Allocate the feature directory ID for a new spec, or audit specs/ for IDs that do not match their names"
+  scripts:
+    - name: new-feature-id
+      file: scripts/powershell/new-feature-id.ps1
+      description: "Allocate or audit a feature ID"
+      runtimes: [powershell]
+    - name: migrate-feature-ids
+      file: scripts/powershell/migrate-feature-ids.ps1
+      description: "Rename legacy NNN- spec directories to dated IDs and rewrite references"
+      runtimes: [powershell]
+    - name: feature-id-lib
+      file: scripts/powershell/feature-id-lib.ps1
+      description: "Shared slug and hash rules"
+      runtimes: [powershell]
+
+hooks:
+  before_specify:
+    command: speckit.feature-id.allocate
+    optional: false
+    description: "Allocate the feature directory before the spec is written"
+
+tags:
+  - "feature-id"
+  - "multi-user"
+  - "branches"

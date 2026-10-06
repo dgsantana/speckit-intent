@@ -1,0 +1,57 @@
+schema_version: "1.0"
+
+preset:
+  id: "intent"
+  name: "Intent"
+  version: "0.1.0"
+  description: "Outcome-first specs: each outcome carries its check; plan and tasks stay small; extra artifacts only when they earn their place"
+  author: "Daniel Santana"
+  repository: "https://github.com/dgsantana/speckit-intent"
+  license: "MIT"
+
+requires:
+  speckit_version: ">=1.0.4"
+
+provides:
+  templates:
+    - type: "template"
+      name: "spec-template"
+      file: "templates/spec-template.md"
+      description: "Intent spec: goal, outcomes with checks, constraints, edge cases, evidence, results"
+      replaces: "spec-template"
+
+    - type: "template"
+      name: "plan-template"
+      file: "templates/plan-template.md"
+      description: "Short plan: approach, files, hard-to-reverse choices, risks"
+      replaces: "plan-template"
+
+    - type: "template"
+      name: "tasks-template"
+      file: "templates/tasks-template.md"
+      description: "Checklist tasks labelled by the outcome they serve"
+      replaces: "tasks-template"
+
+    - type: "command"
+      name: "speckit.specify"
+      file: "commands/speckit.specify.md"
+      description: "Write an intent spec: outcomes and how each is checked"
+      replaces: "speckit.specify"
+
+    - type: "command"
+      name: "speckit.plan"
+      file: "commands/speckit.plan.md"
+      description: "Plan the change that reaches the spec's outcomes"
+      replaces: "speckit.plan"
+
+    - type: "command"
+      name: "speckit.tasks"
+      file: "commands/speckit.tasks.md"
+      description: "Break the plan into tasks, each serving named outcomes"
+      replaces: "speckit.tasks"
+
+tags:
+  - "intent"
+  - "outcomes"
+  - "lean"
+  - "workflow"

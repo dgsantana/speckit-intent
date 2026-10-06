@@ -1,0 +1,30 @@
+schema_version: "1.0"
+
+extension:
+  id: intent
+  name: "Intent Verification"
+  version: "0.1.0"
+  description: "Run every outcome's check in an intent spec and record what happened in its Results section"
+  author: "Daniel Santana"
+  repository: https://github.com/dgsantana/speckit-intent
+  license: MIT
+
+requires:
+  speckit_version: ">=1.0.4"
+
+provides:
+  commands:
+    - name: speckit.intent.verify
+      file: commands/speckit.intent.verify.md
+      description: "Check each outcome of the current spec and record results with evidence"
+
+hooks:
+  after_implement:
+    command: speckit.intent.verify
+    optional: false
+    description: "Verify the spec's outcomes once implementation ends"
+
+tags:
+  - "intent"
+  - "verification"
+  - "outcomes"
