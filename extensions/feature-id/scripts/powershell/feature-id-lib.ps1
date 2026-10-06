@@ -24,17 +24,12 @@ function Find-ProjectRoot {
     return $null
 }
 
-# Shape of a modern ID. The hash is at least 4 hex characters so a short
-# lowercase word cannot be mistaken for one.
-$script:ModernIdPattern = '^(?<date>\d{8})-(?<hash>[0-9a-f]{4,})-(?<slug>[a-z0-9]+(?:-[a-z0-9]+)*)$'
+# Shape of a modern ID. The hash is at least 7 hex characters, so neither a short lowercase word nor the
+# six-digit time in Spec Kit's own timestamp IDs can be mistaken for one.
+$script:ModernIdPattern = '^(?<date>\d{8})-(?<hash>[0-9a-f]{7,})-(?<slug>[a-z0-9]+(?:-[a-z0-9]+)*)$'
+# Legacy shapes: Spec Kit's `sequential` (NNN-slug) and `timestamp` (yyyyMMdd-HHmmss-slug) numbering.
 $script:LegacyIdPattern = '^(?<num>\d{3})-(?<slug>.+)$'
-
-function Get-FeatureIdPatterns {
-    return [pscustomobject]@{
-        Modern = $script:ModernIdPattern
-        Legacy = $script:LegacyIdPattern
-    }
-}
+$script:TimestampIdPattern = '^(?<date>\d{8})-\d{6}-(?<slug>.+)$'
 
 function Get-Slug {
     param([Parameter(Mandatory = $true)][string]$Text)
@@ -101,11 +96,12 @@ function Get-FeatureIdInfo {
         }
     }
 
-    if ($DirectoryName -match $script:LegacyIdPattern) {
+    # Date is set for a timestamp ID, whose name records when it was allocated; a sequential one has none.
+    if ($DirectoryName -match $script:TimestampIdPattern -or $DirectoryName -match $script:LegacyIdPattern) {
         return [pscustomobject]@{
             Name = $DirectoryName
             Kind = 'legacy'
-            Date = $null
+            Date = $Matches['date']
             Hash = $null
             Slug = $Matches['slug']
         }
@@ -118,6 +114,14 @@ function Get-FeatureIdInfo {
         Hash = $null
         Slug = $null
     }
+}
+
+# The slug a directory would have as a dated ID, so legacy names compare with dated ones by the same
+# rule. A legacy slug that cannot be slugged at all compares as its raw text.
+function Get-CanonicalSlug {
+    param([Parameter(Mandatory = $true)]$Feature)
+    if ($Feature.Kind -eq 'modern') { return $Feature.Slug }
+    try { return Get-Slug -Text $Feature.Slug } catch { return $Feature.Slug }
 }
 
 function Resolve-FreeHash {

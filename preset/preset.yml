@@ -10,7 +10,7 @@ preset:
   license: "MIT"
 
 requires:
-  speckit_version: ">=1.0.4"
+  speckit_version: ">=1.1.1"
 
 provides:
   templates:
@@ -32,6 +32,11 @@ provides:
       description: "Checklist tasks labelled by the outcome they serve"
       replaces: "tasks-template"
 
+    - type: "template"
+      name: "decision-template"
+      file: "templates/decision-template.md"
+      description: "Lean decision record: intent, decision, rejected alternatives, evidence, revisit trigger"
+
     - type: "command"
       name: "speckit.specify"
       file: "commands/speckit.specify.md"
@@ -49,6 +54,30 @@ provides:
       file: "commands/speckit.tasks.md"
       description: "Break the plan into tasks, each serving named outcomes"
       replaces: "speckit.tasks"
+
+    - type: "command"
+      name: "speckit.clarify"
+      file: "commands/speckit.clarify.md"
+      description: "Ask only where the answer changes an outcome; write answers where they belong"
+      replaces: "speckit.clarify"
+
+    - type: "command"
+      name: "speckit.analyze"
+      file: "commands/speckit.analyze.md"
+      description: "Read-only check of spec, plan and tasks against each other and the code"
+      replaces: "speckit.analyze"
+
+    - type: "command"
+      name: "speckit.converge"
+      file: "commands/speckit.converge.md"
+      description: "Append tasks for outcomes the code does not yet reach"
+      replaces: "speckit.converge"
+
+    - type: "command"
+      name: "speckit.checklist"
+      file: "commands/speckit.checklist.md"
+      description: "Reviewer's checklist for one concern, testing whether spec and plan say enough"
+      replaces: "speckit.checklist"
 
 tags:
   - "intent"

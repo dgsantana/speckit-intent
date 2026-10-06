@@ -40,7 +40,8 @@ It prints JSON with `FEATURE_ID`, `SLUG`, `HASH`, `DATE`, `FEATURE_DIRECTORY` an
 
 If the input is `--verify`, run the same script with `-Verify`. It recomputes every dated ID's hash from
 its own slug; a non-zero exit lists directories that were hand-edited or renamed without re-deriving
-their hash. Legacy `NNN-` directories are reported as legacy, not failures.
+their hash, and directories that share a slug (two branches that started the same feature). Legacy
+`NNN-` directories are reported as legacy, not failures.
 
 ## Renaming a feature
 

@@ -12,16 +12,24 @@
     command files are brought back.
 
     Rerun after editing this repository, after `specify integration upgrade`, or after adding
-    an integration.
+    an integration. An extension left out with -NoFeatureId or -NoCompanion is removed if an
+    earlier run installed it.
+
+    Prints one `installed for <integration>` or `skipped <integration>: <reason>` line per
+    integration, then a `RESULT:` line. Exits 0 when every integration has the intent commands,
+    2 when any was skipped.
 
 .PARAMETER NoFeatureId
-    Skip the feature-id extension (dated <yyyyMMdd>-<hash>-<slug> feature IDs).
+    Leave out the feature-id extension (dated <yyyyMMdd>-<hash>-<slug> feature IDs).
+
+.PARAMETER NoCompanion
+    Leave out the visual companion extension (needs Node.js 18 or later at run time).
 
 .EXAMPLE
-    pwsh -NoProfile -File D:/dev/tools/speckit-intent/install.ps1
+    pwsh -NoProfile -File "$HOME/.speckit-intent/install.ps1"
 #>
 [CmdletBinding()]
-param([switch]$NoFeatureId)
+param([switch]$NoFeatureId, [switch]$NoCompanion)
 
 $ErrorActionPreference = 'Stop'
 
@@ -37,11 +45,23 @@ $state = Get-Content -LiteralPath $integrationFile -Raw | ConvertFrom-Json
 $default = if ($state.default_integration) { $state.default_integration } else { $state.integration }
 $others = @($state.installed_integrations | Where-Object { $_ -and $_ -ne $default })
 
+# Each extension and the commands it provides, as command files are named after them.
+$provided = [ordered]@{
+    'intent'     = @('intent[.-]verify')
+    'feature-id' = @('feature-id[.-]allocate')
+    'companion'  = @('companion[.-]show')
+}
 $extensions = @('intent')
 if (-not $NoFeatureId) { $extensions += 'feature-id' }
+if (-not $NoCompanion) { $extensions += 'companion' }
+$excluded = @($provided.Keys | Where-Object { $_ -notin $extensions })
 
-# Command files and skill directories this repository provides, in either naming style.
-$ownedPattern = '^speckit[.-](specify|plan|tasks|intent[.-]verify|feature-id[.-]allocate)(\.md|\.toml)?$'
+# Command files and skill directories, in whatever naming style and file extension an integration
+# uses: `speckit.plan.md`, `speckit-plan/`, `speckit.plan.agent.md`, `speckit.plan.yaml`.
+function Get-NamePattern([string[]]$Names) { '^speckit[.-](' + ($Names -join '|') + ')(\..+)?$' }
+$preset = @('specify', 'clarify', 'plan', 'tasks', 'analyze', 'converge', 'checklist')
+$ownedPattern = Get-NamePattern ($preset + @($extensions | ForEach-Object { $provided[$_] }))
+$removedPattern = if ($excluded) { Get-NamePattern @($excluded | ForEach-Object { $provided[$_] }) } else { $null }
 
 function Invoke-Specify {
     param([string[]]$Arguments, [switch]$AllowFailure)
@@ -58,27 +78,35 @@ function Install-Here {
     foreach ($extension in $extensions) {
         Invoke-Specify @('extension', 'add', '--dev', (Join-Path $source "extensions/$extension"), '--force')
     }
+    # Leaving an extension out of a rerun removes it, hooks included.
+    foreach ($extension in $excluded) {
+        Invoke-Specify @('extension', 'remove', $extension, '--force') -AllowFailure
+    }
 }
 
-# The directory an integration writes commands into, from the files its manifest lists:
+# The directories an integration writes commands into, from the files its manifest lists:
 # `.omp/commands/speckit.plan.md` gives `.omp/commands`, `.claude/skills/speckit-plan/SKILL.md`
-# gives `.claude/skills`.
-function Get-CommandDirectory {
+# gives `.claude/skills`. Some write more than one (Copilot: `.github/agents` and `.github/prompts`).
+function Get-CommandDirectories {
     param([string]$Root, [string]$Integration)
     $manifest = Join-Path $Root ".specify/integrations/$Integration.manifest.json"
-    if (-not (Test-Path -LiteralPath $manifest)) { return $null }
+    if (-not (Test-Path -LiteralPath $manifest)) { return @() }
     $files = (Get-Content -LiteralPath $manifest -Raw | ConvertFrom-Json).files.PSObject.Properties.Name
-    $first = $files | Where-Object { $_ -match '(^|/)speckit[.-]plan' } | Select-Object -First 1
-    if (-not $first) { return $null }
-    $parts = $first -split '/'
-    $index = [array]::FindIndex($parts, [Predicate[string]] { param($p) $p -match '^speckit[.-]plan' })
-    return ($parts[0..($index - 1)] -join '/')
+    $directories = foreach ($file in $files) {
+        $parts = $file -split '/'
+        $index = [array]::FindIndex($parts, [Predicate[string]] { param($p) $p -match '^speckit[.-]plan(\.|$)' })
+        if ($index -gt 0) { $parts[0..($index - 1)] -join '/' }
+    }
+    return @($directories | Sort-Object -Unique)
 }
 
 # Copies owned entries from one command directory to another, writing file contents so that
-# development-mode symbolic links in the temporary copy become ordinary files here.
+# development-mode symbolic links in the temporary copy become ordinary files here. Returns the
+# number of entries copied.
 function Copy-Owned {
     param([string]$From, [string]$To)
+    $count = 0
+    if (-not (Test-Path -LiteralPath $From)) { return $count }
     foreach ($entry in Get-ChildItem -LiteralPath $From -Force | Where-Object { $_.Name -match $ownedPattern }) {
         $target = Join-Path $To $entry.Name
         if ($entry.PSIsContainer) {
@@ -92,7 +120,34 @@ function Copy-Owned {
             Remove-Item -LiteralPath $target -Force -ErrorAction SilentlyContinue
             [IO.File]::WriteAllText($target, [IO.File]::ReadAllText($entry.FullName))
         }
+        $count++
     }
+    return $count
+}
+
+# Whether an integration in the project now has the intent version of `plan`, recognised by the section
+# every intent command carries. Checked rather than assumed, so a silent rendering failure is reported.
+function Test-Installed {
+    param([string]$Integration)
+    foreach ($directory in Get-CommandDirectories -Root $project -Integration $Integration) {
+        $full = Join-Path $project $directory
+        if (-not (Test-Path -LiteralPath $full)) { continue }
+        foreach ($entry in Get-ChildItem -LiteralPath $full -Force | Where-Object { $_.Name -match '^speckit[.-]plan(\..+)?$' }) {
+            $files = if ($entry.PSIsContainer) { Get-ChildItem -LiteralPath $entry.FullName -File -Recurse } else { $entry }
+            foreach ($file in $files) {
+                if ((Get-Content -LiteralPath $file.FullName -Raw).Contains('## Asking the user')) { return $true }
+            }
+        }
+    }
+    return $false
+}
+
+# Removes the command files of extensions left out of this run.
+function Remove-Excluded {
+    param([string]$Directory)
+    if (-not $removedPattern -or -not (Test-Path -LiteralPath $Directory)) { return }
+    Get-ChildItem -LiteralPath $Directory -Force | Where-Object { $_.Name -match $removedPattern } |
+        Remove-Item -Recurse -Force
 }
 
 Install-Here
@@ -100,9 +155,8 @@ Install-Here
 # Development-mode installs link the default integration's extension commands into a
 # `.specify-dev` folder; a committed link does not survive a checkout without symbolic-link
 # support, so they become ordinary files and the folder stays out of git.
-$defaultDirectory = Get-CommandDirectory -Root $project -Integration $default
-if ($defaultDirectory) {
-    $full = Join-Path $project $defaultDirectory
+foreach ($directory in Get-CommandDirectories -Root $project -Integration $default) {
+    $full = Join-Path $project $directory
     foreach ($link in Get-ChildItem -LiteralPath $full -Recurse -Force | Where-Object { $_.LinkType -and $_.Name -match '^(speckit[.-].*|SKILL\.md)$' }) {
         $content = [IO.File]::ReadAllText($link.FullName)
         Remove-Item -LiteralPath $link.FullName -Force
@@ -114,12 +168,21 @@ $ignored = if (Test-Path -LiteralPath $ignore) { Get-Content -LiteralPath $ignor
 if ($ignored -notcontains 'extensions/*/.specify-dev/') {
     Add-Content -LiteralPath $ignore -Value "`n# Development-mode install staging (speckit-intent install.ps1).`nextensions/*/.specify-dev/"
 }
-Write-Output "installed for $default"
+$installed = @()
+$skipped = @()
+if (Test-Installed -Integration $default) {
+    $installed += $default
+    Write-Output "installed for $default"
+} else {
+    $skipped += $default
+    Write-Output "skipped ${default}: its plan command is not the intent version after installing"
+}
 
 foreach ($integration in $others) {
-    $directory = Get-CommandDirectory -Root $project -Integration $integration
-    if (-not $directory) {
-        Write-Warning "skipped ${integration}: its manifest does not show where its commands live"
+    $directories = @(Get-CommandDirectories -Root $project -Integration $integration)
+    if ($directories.Count -eq 0) {
+        $skipped += $integration
+        Write-Output "skipped ${integration}: its manifest does not show where its commands live"
         continue
     }
 
@@ -127,9 +190,14 @@ foreach ($integration in $others) {
     New-Item -ItemType Directory -Path $scratch | Out-Null
     try {
         Copy-Item -Recurse -Force -LiteralPath (Join-Path $project '.specify') -Destination (Join-Path $scratch '.specify')
-        $scratchDirectory = Join-Path $scratch $directory
-        New-Item -ItemType Directory -Force -Path (Split-Path -Parent $scratchDirectory) | Out-Null
-        Copy-Item -Recurse -Force -LiteralPath (Join-Path $project $directory) -Destination $scratchDirectory
+        foreach ($directory in $directories) {
+            $scratchDirectory = Join-Path $scratch $directory
+            $projectDirectory = Join-Path $project $directory
+            New-Item -ItemType Directory -Force -Path (Split-Path -Parent $scratchDirectory) | Out-Null
+            if (Test-Path -LiteralPath $projectDirectory) {
+                Copy-Item -Recurse -Force -LiteralPath $projectDirectory -Destination $scratchDirectory
+            }
+        }
 
         Push-Location $scratch
         try {
@@ -139,11 +207,26 @@ foreach ($integration in $others) {
             Pop-Location
         }
 
-        Copy-Owned -From $scratchDirectory -To (Join-Path $project $directory)
-        Write-Output "installed for $integration ($directory)"
+        foreach ($directory in $directories) {
+            $null = Copy-Owned -From (Join-Path $scratch $directory) -To (Join-Path $project $directory)
+            Remove-Excluded -Directory (Join-Path $project $directory)
+        }
+        if (Test-Installed -Integration $integration) {
+            $installed += $integration
+            Write-Output "installed for $integration ($($directories -join ', '))"
+        } else {
+            $skipped += $integration
+            Write-Output "skipped ${integration}: Spec Kit rendered no intent commands into $($directories -join ', ')"
+        }
     } finally {
         Remove-Item -Recurse -Force -LiteralPath $scratch -ErrorAction SilentlyContinue
     }
 }
 
-& specify preset resolve spec-template
+# One line to read the result from, and an exit code that says the same: 0 when every integration has
+# the intent commands, 2 when any was skipped.
+if ($skipped.Count -gt 0) {
+    Write-Output "RESULT: incomplete; installed for: $($installed -join ', '); skipped: $($skipped -join ', ')"
+    exit 2
+}
+Write-Output "RESULT: installed for: $($installed -join ', ')"

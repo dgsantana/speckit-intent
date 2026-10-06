@@ -51,7 +51,7 @@ param(
     [string]$Date,
 
     [Parameter(ParameterSetName = 'Allocate')]
-    [ValidateRange(4, 40)]
+    [ValidateRange(7, 40)]
     [int]$HashLength = 7,
 
     [Parameter(ParameterSetName = 'Verify', Mandatory = $true)]
@@ -79,14 +79,23 @@ function Get-ExistingFeatures {
 
 if ($PSCmdlet.ParameterSetName -eq 'Verify') {
     $failures = @()
-    $report = foreach ($feature in Get-ExistingFeatures) {
+    $features = @(Get-ExistingFeatures)
+    # Two branches that start the same feature on different days each allocate cleanly; only the merged
+    # tree shows both directories, so the audit is where that collision surfaces.
+    # Legacy directories count too: a dated ID beside `007-auth` for the same name is the same collision.
+    $slugCounts = @{}
+    foreach ($feature in $features | Where-Object { $_.Kind -ne 'unknown' }) { $slugCounts[(Get-CanonicalSlug $feature)] += 1 }
+    $duplicate = 'DUPLICATE: another directory holds this slug'
+    $report = foreach ($feature in $features) {
         $status = switch ($feature.Kind) {
-            'legacy' { 'legacy' }
+            'legacy' { if ($slugCounts[(Get-CanonicalSlug $feature)] -gt 1) { $duplicate } else { 'legacy' } }
             'modern' {
                 $expected = Get-SlugHash -Slug $feature.Slug -Length $feature.Hash.Length
-                if ($expected -eq $feature.Hash) { 'ok' } else { "MISMATCH: expected $expected" }
+                if ($expected -ne $feature.Hash) { "MISMATCH: expected $expected" }
+                elseif ($slugCounts[$feature.Slug] -gt 1) { $duplicate }
+                else { 'ok' }
             }
-            default { 'UNRECOGNISED: neither <yyyyMMdd>-<hash>-<slug> nor legacy NNN-<slug>' }
+            default { 'UNRECOGNISED: neither <yyyyMMdd>-<hash>-<slug> nor legacy NNN-<slug> or <yyyyMMdd>-<HHmmss>-<slug>' }
         }
         if ($status -notin @('ok', 'legacy')) { $failures += $feature.Name }
         [pscustomobject]@{ FEATURE_DIRECTORY = "specs/$($feature.Name)"; KIND = $feature.Kind; STATUS = $status }
@@ -114,7 +123,7 @@ $existing = @(Get-ExistingFeatures)
 
 # Idempotence first: the same name resolves to the spec that already exists,
 # whatever date it was allocated on, rather than opening a second directory.
-$sameSlug = $existing | Where-Object { $_.Kind -eq 'modern' -and $_.Slug -eq $slug } | Select-Object -First 1
+$sameSlug = $existing | Where-Object { $_.Kind -ne 'unknown' -and (Get-CanonicalSlug $_) -eq $slug } | Select-Object -First 1
 if ($sameSlug) {
     $result = [ordered]@{
         FEATURE_ID        = $sameSlug.Name

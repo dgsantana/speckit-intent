@@ -1,0 +1,33 @@
+schema_version: "1.0"
+
+extension:
+  id: companion
+  name: "Visual Companion"
+  version: "0.1.0"
+  description: "Show mockups, diagrams and visual options in a local browser tab while specifying or planning, and record each choice it settles"
+  author: "Daniel Santana"
+  repository: https://github.com/dgsantana/speckit-intent
+  license: MIT
+
+requires:
+  speckit_version: ">=1.1.1"
+
+provides:
+  commands:
+    - name: speckit.companion.show
+      file: commands/speckit.companion.show.md
+      description: "Show a visual question in the browser companion and record the choice it settles"
+  scripts:
+    - name: start-companion
+      file: scripts/powershell/start-companion.ps1
+      description: "Start the companion server for this project"
+      runtimes: [powershell]
+    - name: stop-companion
+      file: scripts/powershell/stop-companion.ps1
+      description: "Stop a companion session"
+      runtimes: [powershell]
+
+tags:
+  - "design"
+  - "visual"
+  - "decisions"

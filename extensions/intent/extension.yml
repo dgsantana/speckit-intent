@@ -10,7 +10,7 @@ extension:
   license: MIT
 
 requires:
-  speckit_version: ">=1.0.4"
+  speckit_version: ">=1.1.1"
 
 provides:
   commands:

@@ -11,6 +11,5 @@ the check it adds or runs.
 - [ ] T001 [O1] [Failing test that holds O1, in path/to/test]
 - [ ] T002 [O1] [Change that makes it pass, in path/to/file]
 
-## Verification
-
-- [ ] T0## Run every outcome's check and record results in spec.md (the intent extension's verify command)
+Verification is not a task here: the intent extension runs every outcome's check after implementation
+and records the results in spec.md.

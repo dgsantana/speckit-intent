@@ -1,6 +1,6 @@
 ---
 id: [###-feature-slug]
-status: draft            # draft | planned | building | verified | partial | dropped
+status: draft            # draft | planned | verified | partial | failed; dropped is set by hand
 created: [DATE]
 ---
 
@@ -18,7 +18,7 @@ check that proves it. If an outcome has no check, it is a wish; rewrite it or dr
 | ID | Outcome | Check |
 |----|---------|-------|
 | O1 | [Observable behaviour, with numbers where they matter] | [Test name, command, or measurement and its pass threshold] |
-| O2 | [...] | [...] |
+| O2 | Unchanged: [existing behaviour that must hold] | [Check that passes before and after the change] |
 
 ## Constraints
 

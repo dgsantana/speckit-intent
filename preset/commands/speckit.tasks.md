@@ -21,9 +21,18 @@ $ARGUMENTS
 
 Before starting, read `.specify/extensions.yml` if it exists and run each enabled hook under
 `hooks.before_tasks`: a hook with `optional: false` is executed now and waited for (command id dots become
-hyphens); an optional one is offered to the user with its prompt. Leave hook `condition` expressions to
-the hook runner. If the file cannot be parsed, say so, including that mandatory hooks were not run. After
+hyphens); an optional one is offered to the user as a question. Skip a hook with a non-empty `condition`; the hook runner evaluates those. If the file cannot be parsed, say so, including that mandatory hooks were not run. After
 writing the tasks, do the same for `hooks.after_tasks`.
+
+## Asking the user
+
+Ask through the agent's structured question tool when it has one (`AskUserQuestion` in Claude Code, the
+equivalent tool in other agents): one decision per question, two to four options, your recommendation
+first and marked as such, one line on each option's consequence. Questions whose answers do not depend on
+each other may share one call. Without such a tool, ask in plain text: the question, then a short
+numbered list with the recommendation first. Never print a table of lettered options for the user to
+type a letter back. To settle an order (which tasks or items first), propose one and ask whether to keep
+it or change it; do not ask the user to rank a list.
 
 ## Steps
 
@@ -37,13 +46,19 @@ writing the tasks, do the same for `hooks.after_tasks`.
      order. Other tools parse this format; keep it exact.
    - Group tasks so each group reaches an outcome end to end, the most valuable first. No empty phases.
    - Where an outcome has an automated check, the task adding that check comes before the change that
-     satisfies it, and the check must fail without the change. A test that only shows something exists
-     (a file written, a value constructed, a call returning success) does not count as a check.
+     satisfies it, and the check must fail without the change. An `Unchanged:` outcome is the exception:
+     its check must pass before the change and still pass after it. A test that only shows something
+     exists (a file written, a value constructed, a call returning success) does not count as a check.
    - Each task is small enough to finish and verify on its own.
-   - End with the verification task.
+   - No verification task: `__SPECKIT_COMMAND_INTENT_VERIFY__` runs every outcome's check after
+     implementation, as the intent extension's `after_implement` hook.
 
 4. Every outcome must be served by at least one task, and every task must name an outcome. Report any gap
    rather than inventing work to fill it.
+
+5. If a task cannot be written without changing an outcome or its check, stop and ask the user when the
+   change loosens it (drops it, lowers a threshold, narrows what the check covers). Tightening it or
+   correcting a check that tests the wrong thing needs no confirmation; record either in the spec.
 
 ## Report
 

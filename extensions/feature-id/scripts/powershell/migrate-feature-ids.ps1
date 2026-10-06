@@ -149,13 +149,29 @@ try {
         $slug = Get-Slug -Text $feature.Slug
         $hash = Resolve-FreeHash -Slug $slug -TakenBySlug $taken
         $taken[$slug] = $hash
-        $addDate = Get-SpecAddDate -DirectoryName $feature.Name
+        $addDate = if ($feature.Date) { $feature.Date } else { Get-SpecAddDate -DirectoryName $feature.Name }
         if (-not $addDate) {
             [Console]::Error.WriteLine("ERROR: no allocation date for specs/$($feature.Name) in git history, and no mapping entry. Add one to $mappingRelative rather than letting the clock decide, or the name will differ per machine.")
             exit 1
         }
 
         $plan += [pscustomobject]@{ OldName = $feature.Name; NewName = "$addDate-$hash-$slug"; Source = 'derived' }
+    }
+
+    # Two legacy directories with one slug (two branches that took different numbers for the same
+    # feature) would get one target, and the second `git mv` would move one into the other. A target
+    # slug that a dated directory already holds is the same collision. Both need a person to decide.
+    $bySlug = @{}
+    foreach ($feature in $features | Where-Object { $_.Kind -eq 'modern' }) { $bySlug[$feature.Slug] = @("specs/$($feature.Name)") }
+    foreach ($item in $plan) {
+        $targetSlug = (Get-FeatureIdInfo -DirectoryName $item.NewName).Slug
+        $bySlug[$targetSlug] = @($bySlug[$targetSlug]) + "specs/$($item.OldName)" | Where-Object { $_ }
+    }
+    $collisions = @($bySlug.GetEnumerator() | Where-Object { $_.Value.Count -gt 1 })
+    if ($collisions.Count -gt 0) {
+        [Console]::Error.WriteLine('ERROR: these directories hold the same feature name; merge or rename them by hand, then run again. Nothing was changed.')
+        foreach ($collision in $collisions) { [Console]::Error.WriteLine("  $($collision.Key): $($collision.Value -join ', ')") }
+        exit 1
     }
 
     if ($plan.Count -eq 0) {
@@ -181,21 +197,41 @@ try {
     $candidates = @(git ls-files | Where-Object { $_ -and $_ -ne $mappingRelative })
     if (-not ($candidates -contains '.specify/feature.json')) { $candidates += '.specify/feature.json' }
 
+    # Whole directory-name tokens only: `007-auth` must not match inside `007-auth-tokens`.
+    $tokenPatterns = @{}
+    foreach ($item in $plan) {
+        $tokenPatterns[$item.OldName] = [regex]::new("(?<![A-Za-z0-9_-])$([regex]::Escape($item.OldName))(?![A-Za-z0-9_-])")
+    }
+
+    $strictUtf8 = [Text.UTF8Encoding]::new($false, $true)
     $edits = @()
     $kept = @()
+    $notUtf8 = @()
     foreach ($relative in $candidates) {
         if ($binaryExtensions -contains [IO.Path]::GetExtension($relative).ToLowerInvariant()) { continue }
 
         $full = Join-Path $repoRoot $relative
         if (-not (Test-Path -LiteralPath $full -PathType Leaf)) { continue }
 
-        $content = [IO.File]::ReadAllText($full)
+        # Rewrite UTF-8 only, keeping a byte order mark where there was one; any other encoding would be
+        # garbled by a round trip, so such a file is reported for a person to edit instead.
+        $bytes = [IO.File]::ReadAllBytes($full)
+        $hasBom = $bytes.Length -ge 3 -and $bytes[0] -eq 0xEF -and $bytes[1] -eq 0xBB -and $bytes[2] -eq 0xBF
+        $offset = if ($hasBom) { 3 } else { 0 }
+        try {
+            $content = $strictUtf8.GetString($bytes, $offset, $bytes.Length - $offset)
+        } catch [Text.DecoderFallbackException] {
+            $raw = [Text.Encoding]::Latin1.GetString($bytes)
+            if (@($plan | Where-Object { $raw.Contains($_.OldName) }).Count -gt 0) { $notUtf8 += $relative }
+            continue
+        }
         $updated = $content
         $hits = @()
         foreach ($item in $plan) {
-            if ($updated.Contains($item.OldName)) {
-                $count = ([regex]::Matches($updated, [regex]::Escape($item.OldName))).Count
-                $updated = $updated.Replace($item.OldName, $item.NewName)
+            $pattern = $tokenPatterns[$item.OldName]
+            $count = $pattern.Matches($updated).Count
+            if ($count -gt 0) {
+                $updated = $pattern.Replace($updated, $item.NewName)
                 $hits += "$($item.OldName) x$count"
             }
         }
@@ -208,7 +244,7 @@ try {
 
         $edits += [pscustomobject]@{ FILE = $relative; REPLACEMENTS = $hits }
         if ($Apply) {
-            [IO.File]::WriteAllText($full, $updated, [Text.UTF8Encoding]::new($false))
+            [IO.File]::WriteAllText($full, $updated, [Text.UTF8Encoding]::new($hasBom))
         }
     }
 
@@ -236,6 +272,7 @@ try {
         RENAMES = @($plan | ForEach-Object { [pscustomobject]@{ FROM = "specs/$($_.OldName)"; TO = "specs/$($_.NewName)"; SOURCE = $_.Source } })
         FILES   = @($edits)
         KEPT    = @($kept)
+        NOT_UTF8 = @($notUtf8)
     }
 
     if ($Json) {
@@ -250,6 +287,11 @@ try {
             Write-Output ''
             Write-Output "Files left with old names (-Keep): $($kept.Count)"
             foreach ($path in $kept) { Write-Output "  $path" }
+        }
+        if ($notUtf8.Count -gt 0) {
+            Write-Output ''
+            Write-Output "Files not rewritten because they are not UTF-8; update their references by hand: $($notUtf8.Count)"
+            foreach ($path in $notUtf8) { Write-Output "  $path" }
         }
         Write-Output ''
         Write-Output 'Then: commit the renames and the mapping together, and run new-feature-id.ps1 -Verify.'
