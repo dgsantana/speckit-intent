@@ -81,7 +81,10 @@ the difference, is how a silent change to the target is found.
    happens today (a bug); when it cannot happen yet, it comes with the change and must exercise the path
    where the failure would occur.
    A fix that tightens the check or makes it test what the outcome states may be made here; run it
-   again and record the change as Changing the target describes. A fix that loosens it (lowers a
+   again and record the change as Changing the target describes. A check that fails only some of the
+   time can be joined by a deterministic check of the cause, which can fail first reliably. That is a
+   tightening while the behaviour check still runs; dropping the behaviour check for the cause check
+   narrows what is proven, and is a loosening. A fix that loosens it (lowers a
    threshold or drops the outcome) is not made here: record the outcome against the check as written and
    ask the user.
 
