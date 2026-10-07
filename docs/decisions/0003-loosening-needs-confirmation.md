@@ -1,6 +1,6 @@
 # 0003. Loosening an outcome needs the user's confirmation
 
-Status: active
+Status: active, amended by [0012](0012-review-friction-fixes.md)
 Date: 2026-10-06
 
 ## Intent

@@ -37,14 +37,13 @@ that upstream changes to the replaced commands do not flow in; review the Spec K
 
 ## The artifacts
 
-**spec.md**: frontmatter `id` and `status` (`draft`, `planned`, `verified`, `partial`, `failed`, and
-`dropped` set by hand);
-Goal; an Outcomes table where every outcome carries its check, with behaviour that must not change
-written as `Unchanged:` outcomes and ways the intent could still be missed as `Never:` outcomes;
-Constraints; Out of scope;
-Edge cases; Evidence tagged `measured`, `documented` or `assumption`; at most three Open questions;
-Target changes, logged when Outcomes or Constraints change after planning; Results, filled only by
-verification.
+**spec.md**: frontmatter `id`, `size` (`small` or `normal`) and `status` (`draft`, `verified`, `partial`,
+`failed`, and `dropped` set by hand); Goal; an Outcomes table where every outcome carries its check, with
+behaviour that must not change written as `Unchanged:` outcomes and ways the intent could still be missed
+as `Never:` outcomes; Decided, for choices the user made that the work follows; Constraints; Out of scope;
+Edge cases; Evidence tagged `measured`, `documented` or `assumption`; at most three Open questions; Target
+changes, logged when Outcomes or Constraints change after planning; Results, written only by
+verification, including a person's observation when that is the check.
 
 **plan.md**: Approach (interfaces and pseudo-code, no implementations); Changes mapped to the outcomes
 they serve; Choices that are hard to reverse, with the rejected alternative; Risks; links to any
@@ -57,21 +56,33 @@ extension runs it after `implement`.
 **Results** (written by `speckit.intent.verify`): per outcome Pass, Fail, Partial or Not run, with the
 command, numbers and commit checked.
 
+**Two sizes.** `specify` labels each change `small` (a bug fix, or a change confined to a few files
+that adds no interface, data shape, dependency or decision others build on) or `normal`, says why, and
+the user can override it. A small change gets a spec of Goal, Outcomes and Results (for a bug, a single
+`Never:` outcome), a plan of Approach and Changes, and none of the target hash, decision records or stop
+rules below. In both sizes, every section that would be empty is left out.
+
 An outcome or its check can change after the spec is written, when planning, tasking or verification
 shows it was wrong. Tightening it, or correcting a check that tested the wrong thing, is recorded in the
-spec and needs no approval. Loosening it (dropping it, lowering a threshold, narrowing what the check
-covers) needs the user's confirmation first: otherwise the agent can make the work pass by moving the
-target.
+spec and needs no approval. Loosening it (dropping an outcome or lowering a threshold) needs the user's
+confirmation first: otherwise the agent can make the work pass by moving the target.
 
-`plan` records a hash of the spec's Outcomes and Constraints (`target_hash`, computed by
-`target-hash.ps1`). Any later edit to them adds a line to the spec's Target changes section and
-re-records the hash; `analyze` and `intent.verify` report a change that no line explains. This detects a
-moved target; it does not prevent one.
+For a normal change, `plan` records a hash of the spec's Outcomes and Constraints (`target_hash`,
+computed by `target-hash.ps1`). Any later edit to them adds a line to the spec's Target changes section
+and re-records the hash; `analyze` and `intent.verify` report a change that no line explains, and carry
+on. This detects a moved target; it does not prevent one, and it never stops the work.
 
-Every plan carries a fixed "When to stop and ask" section, which `implement` reads with the plan: the
-spec outranks decision records, which outrank the plan, which outranks the tasks, and the build stops for
-the user only for ambiguity, a conflict between things the user owns, a loosened target, an irreversible
-action, or being stuck. Each answer is written into the files and not asked again.
+A normal `tasks.md` carries a short "When to stop and ask" section, read by whoever builds from it:
+`implement`, or an agent resuming from the task list. The constitution, the spec and decision records
+belong to the user; the plan and tasks belong to the builder and give way when they disagree, and a task
+found wrong is corrected in place with one line on why. The build stops for the user only for ambiguity,
+a conflict between things the user owns (including replacing a decision record), a loosened target, an
+irreversible action, or being stuck. Each answer is written into the files and not asked again. A task
+that depends on an assumption measures it first.
+
+Results are written only by `intent.verify`. If tasks are done outside `implement`, its hook does not
+run; `tasks.md` ends by saying to run verify then, and `analyze` flags ticked tasks without verified
+Results. A measured number lives in Results; Evidence, task notes and decision records point to it.
 
 `intent.verify` is run by the agent that built the work. Adding `independent` to its input
 (`/speckit-intent-verify independent` in Claude Code) also has a fresh, read-only sub-agent try to show
@@ -147,7 +158,9 @@ The steps below are written to be followed as they stand, by a person or an agen
 
 4. **Choose the extensions.** Ask the user the questions that apply:
    - Dated feature IDs (`feature-id`)? Recommended when more than one person or agent opens specs on
-     separate branches; for a single author, leave it out with `-NoFeatureId`. Default: install it.
+     separate branches; for a single author, leave it out with `-NoFeatureId`. Count the authors with
+     `git shortlog -sn --all`: recommend it for more than one, and recommend leaving it out for one. If
+     the user cannot be asked, follow that recommendation.
    - Visual companion (`companion`)? Shows layouts and diagrams in a browser tab while specifying;
      needs Node.js 18. Leave it out with `-NoCompanion`. Default: install it if step 1 found Node.js 18
      or later. If Node.js is missing or older, do not ask: leave it out and tell the user why.
@@ -271,7 +284,13 @@ way.
    pwsh -NoProfile -File .specify/extensions/feature-id/scripts/powershell/migrate-feature-ids.ps1
    ```
    Dates come from the oldest commit on any branch that added each `spec.md`, so every branch derives the
-   same names. Changelogs and `history/` folders are left alone (`-Keep` changes the patterns), because
+   same names.
+
+   Short references such as `specs/021` are rewritten too, when one directory has that number. Prose
+   ("spec 021", "specification 021"), a number two directories share, and a path into another tree
+   (`../other/specs/021`) are listed under UNRESOLVED for a person to fix. If the repository's documents
+   cite another repository's specs by number, pass `-Foreign '<pattern>'` (for example `'ACME|AcmeCorp/'`)
+   so short references on lines naming it are listed instead of rewritten: the number may be theirs. Changelogs and `history/` folders are left alone (`-Keep` changes the patterns), because
    they describe what happened under the old names.
 3. **Apply and commit** the renames, the rewritten references and `.specify/feature-id-migration.json`
    together, as one commit that does nothing else:
@@ -301,9 +320,10 @@ status.
 A plan's Choices record what was chosen for that feature and what was rejected. A choice that binds
 beyond the feature also gets a decision record, so it is found by the next feature rather than buried in
 an old plan. `plan` writes it into the project's existing decisions folder, in its format, when there is
-one (`docs/decisions`, `docs/adr`, `adr`, `doc/adr`); otherwise into `docs/decisions/<yyyyMMdd>-<slug>.md`
-from the preset's `decision-template`: intent, decision, rejected alternatives, evidence tiers, and a
-concrete trigger for revisiting it. `intent.verify` reports a result that contradicts a linked record's
+one (`docs/decisions`, `docs/adr`, `adr`, `doc/adr`). Otherwise it asks once whether to keep records in
+`docs/decisions/`, and remembers the answer in `.specify/intent.json`. Records there are
+`<yyyyMMdd>-<slug>.md` from the preset's `decision-template`: intent, decision, rejected alternatives,
+evidence tiers, and a concrete trigger for revisiting it. Small changes write no records. `intent.verify` reports a result that contradicts a linked record's
 evidence or meets its trigger.
 
 ## Visual companion

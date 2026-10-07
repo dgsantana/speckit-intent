@@ -137,6 +137,36 @@ Describe 'migration' {
         Test-Path -LiteralPath (Join-Path $root "specs/$tokens/spec.md") | Should -BeTrue
     }
 
+    It 'rewrites short specs/NNN references and lists the ones it cannot resolve' {
+        $root = New-Project -Git -Specs @('021-launcher-page', '007-auth', '007-auth-tokens')
+        Set-Content -LiteralPath (Join-Path $root 'notes.md') -Value @(
+            'Done in specs/021 (T005), see specs/021-launcher-page/spec.md.'
+            'Also specs\021 on Windows, and specs/0210 is something else.'
+            'Overlap: specs/007 is ambiguous.'
+            'Prose: spec 021 shipped, as specification 021 says.'
+            'Elsewhere: ../acme/specs/021 belongs to another repository.'
+            'Foreign: ACME specs/021 is theirs.'
+        )
+        git -C $root add -A
+        git -C $root commit -q -m 'specs' --date '2026-09-01T12:00:00'
+
+        $result = Invoke-Script $root $migrator @('-Apply', '-Json', '-Foreign', 'ACME')
+        $result.ExitCode | Should -Be 0 -Because $result.Output
+        $date = git -C $root log -1 --format=%ad --date=format:%Y%m%d
+        $launcher = Get-Id $date 'launcher-page'
+
+        $lines = Get-Content -LiteralPath (Join-Path $root 'notes.md')
+        $lines[0] | Should -Be "Done in specs/$launcher (T005), see specs/$launcher/spec.md."
+        $lines[1] | Should -Be "Also specs\$launcher on Windows, and specs/0210 is something else."
+        $lines[2] | Should -Be 'Overlap: specs/007 is ambiguous.'
+        $lines[3] | Should -Be 'Prose: spec 021 shipped, as specification 021 says.'
+        $lines[4] | Should -Be 'Elsewhere: ../acme/specs/021 belongs to another repository.'
+        $lines[5] | Should -Be 'Foreign: ACME specs/021 is theirs.'
+
+        $unresolved = ($result.Output | ConvertFrom-Json).UNRESOLVED
+        ($unresolved | Where-Object { $_.FILE -eq 'notes.md' }).LINE | Sort-Object | Should -Be @(3, 4, 5, 6)
+    }
+
     It 'refuses two legacy directories that would take the same name, and moves nothing' {
         $root = New-Project -Git -Specs @('007-auth', '012-auth')
         git -C $root add -A

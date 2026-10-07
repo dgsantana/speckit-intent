@@ -79,10 +79,9 @@ the one `.specify/feature.json` names.
 
 - If it changes what the feature must do, write it into the spec as an outcome, constraint or edge case;
   after planning, record it as Changing the target describes.
-- If it is a design choice that is hard to reverse or likely to be re-litigated, add it to the plan's
-  Choices with the options not taken as the rejected alternatives and why the user preferred this one.
-  Before a plan exists, write it as a spec Constraint naming the options not taken; planning carries it
-  into Choices.
+- If it picks among options (a layout, a design direction, a tier), write it in the spec's Decided
+  section with the options not taken and why the user preferred this one. The builder follows it and does
+  not revisit it.
 - Copy the screen that settled it to `<feature directory>/design/<name>.html` and link it from where the
   choice is written. Session directories are not committed; this copy is the evidence.
 

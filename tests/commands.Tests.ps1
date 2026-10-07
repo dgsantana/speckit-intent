@@ -6,11 +6,14 @@ BeforeDiscovery {
         Where-Object { $_.Directory.Name -eq 'commands' } |
         ForEach-Object { @{ Name = $_.BaseName; Path = $_.FullName } })
     # Commands that never ask the user anything. A new command either carries the rule or is listed here.
-    $silent = @('speckit.feature-id.allocate')
+    $silent = @('speckit.feature-id.allocate', 'speckit.converge')
     $asking = @($commands | Where-Object { $_.Name -notin $silent })
     # Commands that may edit a spec's Outcomes or Constraints after planning.
     $editing = @('speckit.clarify', 'speckit.plan', 'speckit.tasks', 'speckit.intent.verify', 'speckit.companion.show')
     $targetEditors = @($commands | Where-Object { $_.Name -in $editing })
+    # Commands that order tasks or judge checks, and so state the red-first rule.
+    $ordering = @('speckit.tasks', 'speckit.analyze', 'speckit.converge', 'speckit.intent.verify')
+    $redFirst = @($commands | Where-Object { $_.Name -in $ordering })
 }
 
 BeforeAll {
@@ -45,6 +48,16 @@ Describe 'changing the target' {
     It '<Name> carries the same Changing the target rule as every command that may edit the target' -ForEach $targetEditors {
         $targetReference | Should -Not -BeNullOrEmpty
         Get-Section $Path 'Changing the target' | Should -BeExactly $targetReference
+    }
+}
+
+Describe 'red-first' {
+    It '<Name> states the red-first rule in the same words as the others' -ForEach $redFirst {
+        $text = (Get-Content -LiteralPath $Path -Raw) -replace '\s+', ' '
+        $match = [regex]::Match($text, 'Red-first: .*?would occur\.')
+        $match.Success | Should -BeTrue
+        $tasks = (Get-Content -LiteralPath (Join-Path $repo 'preset/commands/speckit.tasks.md') -Raw) -replace '\s+', ' '
+        $match.Value | Should -BeExactly ([regex]::Match($tasks, 'Red-first: .*?would occur\.').Value)
     }
 }
 

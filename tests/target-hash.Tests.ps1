@@ -91,6 +91,14 @@ Describe 'target hash' {
         (Invoke-Hash $spec 'Check').Result.STATUS | Should -Be 'changed'
     }
 
+    It 'hashes a spec whose empty Constraints section was removed' {
+        $spec = New-Spec ($base -replace '(?s)## Constraints.*?(?=## Edge cases)', '')
+        $result = Invoke-Hash $spec 'Record'
+        $result.ExitCode | Should -Be 0
+        [IO.File]::WriteAllText($spec, [IO.File]::ReadAllText($spec).Replace('for 8 h', 'for 4 h'))
+        (Invoke-Hash $spec 'Check').Result.STATUS | Should -Be 'changed'
+    }
+
     It 'reports a spec whose target was never recorded' {
         $spec = New-Spec $base
         $check = Invoke-Hash $spec 'Check'

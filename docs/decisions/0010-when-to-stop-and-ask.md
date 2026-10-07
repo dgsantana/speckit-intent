@@ -1,6 +1,6 @@
 # 0010. An order of authority and five reasons to stop
 
-Status: active
+Status: active, amended by [0012](0012-review-friction-fixes.md), [0013](0013-build-rules-in-tasks.md)
 Date: 2026-10-07
 
 ## Intent

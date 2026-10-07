@@ -1,10 +1,13 @@
 ---
 id: [###-feature-slug]
-status: draft            # draft | planned | verified | partial | failed; dropped is set by hand
+size: normal             # small | normal
+status: draft            # draft | verified | partial | failed; dropped is set by hand
 created: [DATE]
 ---
 
 # [FEATURE NAME]
+
+<!-- Goal, Outcomes and Results are always kept. Every other section is removed when it would be empty. -->
 
 ## Goal
 
@@ -13,13 +16,22 @@ created: [DATE]
 ## Outcomes
 
 What must be true when this is done. Each outcome is observable from outside the code and carries the
-check that proves it. If an outcome has no check, it is a wish; rewrite it or drop it.
+check that proves it. If an outcome has no check, it is a wish; rewrite it or drop it. An outcome may
+start with `Unchanged:` (existing behaviour that must hold; its check passes before and after the
+change) or `Never:` (a failure the work rules out; its check tries to cause it and passes when it
+cannot). For a bug, the outcome is a single `Never:` one: the reported behaviour does not occur.
 
 | ID | Outcome | Check |
 |----|---------|-------|
 | O1 | [Observable behaviour, with numbers where they matter] | [Test name, command, or measurement and its pass threshold] |
-| O2 | Unchanged: [existing behaviour that must hold] | [Check that passes before and after the change] |
-| O3 | Never: [an observable way the intent is missed even when the other outcomes look met] | [Check that tries to cause it and passes when it cannot] |
+
+## Decided
+
+Choices the user made, before or during the work, that the work follows (a tier, a publish location, a
+layout picked in the companion). One line each, with the options not taken. Not outcomes and not
+constraints: the user's decisions, which the builder does not revisit.
+
+- [...]
 
 ## Constraints
 
@@ -49,14 +61,14 @@ What this rests on, each tagged by tier. A claim moves up a tier only by measure
 
 ## Open questions
 
-[At most three, only where the answer changes an outcome. Remove the section when there are none.]
+[At most three, only where the answer changes an outcome.]
 
 ## Target changes
 
-[Changes to Outcomes or Constraints after planning, one line each: date, item, what changed, tightened
-or loosened, who confirmed a loosening. Empty until then.]
+[Normal size only, after planning: changes to Outcomes or Constraints, one line each: date, item, what
+changed, tightened or loosened, who confirmed a loosening.]
 
 ## Results
 
-[Filled by verification, not by hand-waving: per outcome, Pass / Fail / Partial, with the command run,
-numbers and commit. Until then, leave this line.]
+[Written only by the intent extension's verify command: per outcome, Pass / Fail / Partial / Not run,
+with the command run, numbers, the code checked and who checked it. Until then, leave this line.]

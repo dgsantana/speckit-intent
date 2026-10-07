@@ -21,23 +21,15 @@ $ARGUMENTS
 
 Before starting, read `.specify/extensions.yml` if it exists and run each enabled hook under
 `hooks.before_converge`: a hook with `optional: false` is executed now and waited for (command id dots
-become hyphens); an optional one is offered to the user as a question. Skip a hook with a non-empty `condition`; the hook runner evaluates those. If the file cannot be parsed, say so, including that mandatory hooks were
+become hyphens); an optional one is offered to the user as a question.
+Skip a hook with a non-empty `condition`; the hook runner evaluates those. If the file cannot be
+parsed, say so, including that mandatory hooks were
 not run. After finishing, do the same for `hooks.after_converge`.
 
 ## Principle
 
 Append-only. The one write this command makes is a new group at the end of tasks.md. It changes no
 existing task, no spec, no plan and no code.
-
-## Asking the user
-
-Ask through the agent's structured question tool when it has one (`AskUserQuestion` in Claude Code, the
-equivalent tool in other agents): one decision per question, two to four options, your recommendation
-first and marked as such, one line on each option's consequence. Questions whose answers do not depend on
-each other may share one call. Without such a tool, ask in plain text: the question, then a short
-numbered list with the recommendation first. Never print a table of lettered options for the user to
-type a letter back. To settle an order (which tasks or items first), propose one and ask whether to keep
-it or change it; do not ask the user to rank a list.
 
 ## Steps
 
@@ -52,10 +44,12 @@ it or change it; do not ask the user to rank a list.
 
 4. If nothing is missing, leave tasks.md untouched. Otherwise append a `## Convergence` group (numbered
    `## Convergence 2` and so on if one exists) with one task per gap, continuing the T### sequence, in
-   the same format: `- [ ] T### [O#] Description with file path`. A missing check comes before the
-   change it holds, except for an `Unchanged:` outcome, whose check holds before and after, and a
-   `Never:` outcome whose failure cannot happen yet, whose check comes with the change. Add no
-   verification task; verification runs after implementation as a hook.
+   the same format: `- [ ] T### [O#] Description with file path`, ordered by this rule.
+   Red-first: an outcome's check is written before the change and fails without it. An `Unchanged:`
+   check passes before and after the change. A `Never:` check fails before the change when the failure
+   happens today (a bug); when it cannot happen yet, it comes with the change and must exercise the path
+   where the failure would occur.
+   Add no verification task; verification runs after implementation as a hook.
 
 ## Report
 

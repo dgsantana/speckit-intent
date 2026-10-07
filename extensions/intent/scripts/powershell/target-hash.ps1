@@ -47,15 +47,20 @@ if (-not (Test-Path -LiteralPath $Spec)) { Fail "spec not found: $Spec" }
 $text = [IO.File]::ReadAllText($Spec)
 $lf = $text -replace "`r`n", "`n"
 
-function Get-Section([string]$Name) {
+# Constraints may be removed when there are none; it then counts as empty. A spec without Outcomes has
+# no target at all.
+function Get-Section([string]$Name, [switch]$Optional) {
     $match = [regex]::Match($lf, "(?ims)^##[ \t]+$Name[ \t]*\n(.*?)(?=^##[ \t]|\z)")
-    if (-not $match.Success) { Fail "the spec has no '## $Name' section." }
+    if (-not $match.Success) {
+        if ($Optional) { return '' }
+        Fail "the spec has no '## $Name' section."
+    }
     $body = [regex]::Replace($match.Groups[1].Value, '(?s)<!--.*?-->', '')
     $lines = $body -split "`n" | ForEach-Object { $_.TrimEnd() } | Where-Object { $_ -ne '' }
     return ($lines -join "`n")
 }
 
-$canonical = "## outcomes`n" + (Get-Section 'Outcomes') + "`n## constraints`n" + (Get-Section 'Constraints')
+$canonical = "## outcomes`n" + (Get-Section 'Outcomes') + "`n## constraints`n" + (Get-Section 'Constraints' -Optional)
 $hash = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData([Text.Encoding]::UTF8.GetBytes($canonical))).ToLowerInvariant()
 
 $frontmatter = [regex]::Match($text, '\A---\r?\n(.*?\r?\n)---\r?\n', 'Singleline')

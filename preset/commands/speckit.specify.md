@@ -58,16 +58,20 @@ it or change it; do not ask the user to rank a list.
    docs index and any decision records the description touches. Look at the code the description names:
    a spec that contradicts the code is wrong before it starts.
 
-3. **Fill the template.**
+3. **Size.** Set `size` in the frontmatter and say which in one line, with why; the user may override it.
+   `small`: a bug fix, or a change confined to a few files that adds no interface, data shape,
+   dependency or decision others will build on. `normal`: anything else. A small spec has Goal, Outcomes
+   and Results, plus any other section that has something to say; a small change gets no target hash, no
+   decision record and a two-section plan.
+
+4. **Fill the template.** Keep Goal, Outcomes and Results; remove every other section that would be empty.
    - Goal: who needs it and the trigger.
    - Outcomes: each observable, with numbers where they matter, each with a check (test, command or
-     measurement and its pass threshold). Prefer few strong outcomes over many weak ones.
-     Behaviour that must stay the same for existing inputs is an outcome too, with its own check; start
-     its text with `Unchanged:` so later steps know its check passes before the change as well as after.
-     A way the intent could be missed even when the other outcomes look met (a session still valid after
-     logout; for a bug, the reported behaviour) is an outcome starting with `Never:`, whose check tries to
-     cause it and passes when it cannot. Write only the ones a skeptical reviewer would try; the plain
-     negation of another outcome adds nothing.
+     measurement and its pass threshold). Prefer few strong outcomes over many weak ones. Behaviour that
+     must stay the same for existing inputs is an `Unchanged:` outcome. For a bug, the outcome is a
+     single `Never:` one: the reported behaviour does not occur. For other work, add a `Never:` outcome
+     only for a failure a skeptical reviewer would try that no other outcome already rules out.
+   - Decided: choices the user has already made that the work must follow, with the options not taken.
    - Constraints, out of scope, edge cases: one line each. An edge case whose wrong handling would miss
      the intent becomes an outcome, usually `Never:`.
    - Evidence: tag every claim measured, documented or assumption. Do not promote an assumption to fact
@@ -79,12 +83,12 @@ it or change it; do not ask the user to rank a list.
    If a question would be clearer shown than described (a layout, a diagram, visual options side by
    side) and the companion extension is installed, use `__SPECKIT_COMMAND_COMPANION_SHOW__` for it.
 
-4. **No implementation in the spec.** Interfaces and short pseudo-code are acceptable when an outcome
+5. **No implementation in the spec.** Interfaces and short pseudo-code are acceptable when an outcome
    cannot be stated without them; function bodies are not.
 
-5. **Do not generate** a separate quality checklist, a research file or a data model here.
+6. **Do not generate** a separate quality checklist, a research file or a data model here.
 
 ## Report
 
-The feature directory, the outcomes in one line each, any open questions (asked as Asking the user
+The feature directory, the size and why, the outcomes in one line each, any open questions (asked as Asking the user
 describes), and the next step: `__SPECKIT_COMMAND_PLAN__`.

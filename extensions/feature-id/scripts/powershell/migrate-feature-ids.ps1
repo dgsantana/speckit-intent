@@ -46,6 +46,11 @@
 .PARAMETER Json
     Emit a JSON report instead of text.
 
+.PARAMETER Foreign
+    A regular expression for lines that talk about another repository's specs (for example
+    'ACME|AcmeCorp/'). Short `specs/NNN` references on such lines are listed for a person instead of
+    rewritten, since the number may belong to that repository.
+
 .EXAMPLE
     pwsh -NoProfile -File .specify/extensions/feature-id/scripts/powershell/migrate-feature-ids.ps1
 
@@ -57,7 +62,8 @@ param(
     [switch]$Apply,
     [string[]]$Keep = @('CHANGELOG*', '*/CHANGELOG*', '*/history/*', 'history/*'),
     [switch]$Json,
-    [switch]$AllowDirty
+    [switch]$AllowDirty,
+    [string]$Foreign
 )
 
 $ErrorActionPreference = 'Stop'
@@ -203,10 +209,32 @@ try {
         $tokenPatterns[$item.OldName] = [regex]::new("(?<![A-Za-z0-9_-])$([regex]::Escape($item.OldName))(?![A-Za-z0-9_-])")
     }
 
+    # Short references: `specs/021` (or `specs\021`) means the one legacy directory numbered 021. Listed for
+    # a person instead: a number two directories share, prose such as "spec 021", a path into another
+    # tree (`../acme/specs/021`), and lines matching -Foreign, where the number may be another repository's.
+    $byNumber = @{}
+    foreach ($item in $plan) {
+        if ($item.OldName -match '^(\d{3})-') { $byNumber[$Matches[1]] = @($byNumber[$Matches[1]]) + $item | Where-Object { $_ } }
+    }
+    $shortPatterns = @{}
+    foreach ($number in $byNumber.Keys) {
+        if (@($byNumber[$number]).Count -eq 1) {
+            $shortPatterns[$number] = [pscustomobject]@{
+                Pattern = [regex]::new("(?<=(?<![A-Za-z0-9_./\\-])specs[\\/])$number(?![A-Za-z0-9_-])")
+                NewName = @($byNumber[$number])[0].NewName
+            }
+        }
+    }
+    $leftoverPattern = if ($byNumber.Count -gt 0) {
+        [regex]::new("(?i)(?<![A-Za-z0-9_-])spec(?:ification)?s?[\\/ ]+(?:$(($byNumber.Keys | Sort-Object) -join '|'))(?![0-9A-Za-z_-])")
+    } else { $null }
+    $foreignPattern = if ($Foreign) { [regex]::new($Foreign) } else { $null }
+
     $strictUtf8 = [Text.UTF8Encoding]::new($false, $true)
     $edits = @()
     $kept = @()
     $notUtf8 = @()
+    $unresolved = @()
     foreach ($relative in $candidates) {
         if ($binaryExtensions -contains [IO.Path]::GetExtension($relative).ToLowerInvariant()) { continue }
 
@@ -235,12 +263,38 @@ try {
                 $hits += "$($item.OldName) x$count"
             }
         }
-        if ($hits.Count -eq 0) { continue }
+        if ($shortPatterns.Count -gt 0) {
+            $shortHits = @{}
+            $lines = $updated -split "`n"
+            for ($i = 0; $i -lt $lines.Count; $i++) {
+                if ($foreignPattern -and $foreignPattern.IsMatch($lines[$i])) { continue }
+                foreach ($number in $shortPatterns.Keys) {
+                    $short = $shortPatterns[$number]
+                    $count = $short.Pattern.Matches($lines[$i]).Count
+                    if ($count -gt 0) {
+                        $lines[$i] = $short.Pattern.Replace($lines[$i], $short.NewName)
+                        $shortHits[$number] += $count
+                    }
+                }
+            }
+            $updated = $lines -join "`n"
+            foreach ($number in $shortHits.Keys | Sort-Object) { $hits += "specs/$number x$($shortHits[$number])" }
+        }
 
         if (Test-Kept -Relative $relative) {
-            $kept += $relative
+            if ($hits.Count -gt 0) { $kept += $relative }
             continue
         }
+
+        if ($leftoverPattern) {
+            $lines = $updated -split "`n"
+            for ($i = 0; $i -lt $lines.Count; $i++) {
+                if ($leftoverPattern.IsMatch($lines[$i])) {
+                    $unresolved += [pscustomobject]@{ FILE = $relative; LINE = $i + 1; TEXT = $lines[$i].Trim() }
+                }
+            }
+        }
+        if ($hits.Count -eq 0) { continue }
 
         $edits += [pscustomobject]@{ FILE = $relative; REPLACEMENTS = $hits }
         if ($Apply) {
@@ -273,6 +327,7 @@ try {
         FILES   = @($edits)
         KEPT    = @($kept)
         NOT_UTF8 = @($notUtf8)
+        UNRESOLVED = @($unresolved)
     }
 
     if ($Json) {
@@ -287,6 +342,11 @@ try {
             Write-Output ''
             Write-Output "Files left with old names (-Keep): $($kept.Count)"
             foreach ($path in $kept) { Write-Output "  $path" }
+        }
+        if ($unresolved.Count -gt 0) {
+            Write-Output ''
+            Write-Output "References to legacy numbers left as they are; fix by hand: $($unresolved.Count)"
+            foreach ($entry in $unresolved) { Write-Output "  $($entry.FILE):$($entry.LINE)  $($entry.TEXT)" }
         }
         if ($notUtf8.Count -gt 0) {
             Write-Output ''

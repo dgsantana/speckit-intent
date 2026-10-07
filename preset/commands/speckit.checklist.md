@@ -16,7 +16,9 @@ $ARGUMENTS
 
 Before starting, read `.specify/extensions.yml` if it exists and run each enabled hook under
 `hooks.before_checklist`: a hook with `optional: false` is executed now and waited for (command id dots
-become hyphens); an optional one is offered to the user as a question. Skip a hook with a non-empty `condition`; the hook runner evaluates those. If the file cannot be parsed, say so, including that mandatory hooks were
+become hyphens); an optional one is offered to the user as a question.
+Skip a hook with a non-empty `condition`; the hook runner evaluates those. If the file cannot be
+parsed, say so, including that mandatory hooks were
 not run. After writing the checklist, do the same for `hooks.after_checklist`.
 
 ## Principle
