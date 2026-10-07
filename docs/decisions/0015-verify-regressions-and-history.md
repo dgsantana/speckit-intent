@@ -1,6 +1,6 @@
 # 0015. Verify catches regressions and keeps the history
 
-Status: active
+Status: active, amended by [0016](0016-field-rules-and-trim.md)
 Date: 2026-10-07
 
 ## Intent

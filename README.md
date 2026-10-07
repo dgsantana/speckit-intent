@@ -54,7 +54,8 @@ outcome end to end, tests before the change they hold. Verification is not a tas
 extension runs it after `implement`.
 
 **Results** (written by `speckit.intent.verify`): per outcome Pass, Fail, Partial or Not run, with the
-command, numbers and commit checked.
+evidence, the code checked and who checked it. Verify changes no code; its report sends failures to
+`converge` and `implement` (see `extensions/intent/commands/speckit.intent.verify.md`).
 
 **Two sizes.** `specify` labels each change `small` (a bug fix, or a change confined to a few files
 that adds no interface, data shape, dependency or decision others build on) or `normal`, says why, and
@@ -82,7 +83,8 @@ that depends on an assumption measures it first.
 
 Results are written only by `intent.verify`. If tasks are done outside `implement`, its hook does not
 run; `tasks.md` ends by saying to run verify then, and `analyze` flags ticked tasks without verified
-Results. A measured number lives in Results; Evidence, task notes and decision records point to it.
+Results. An outcome's measured result lives in Results; other files point to its row. Measurements taken
+before the change, which motivated it, stay in Evidence.
 
 `intent.verify` is run by the agent that built the work. Adding `independent` to its input
 (`/speckit-intent-verify independent` in Claude Code) also has a fresh, read-only sub-agent try to show
@@ -205,18 +207,19 @@ The steps below are written to be followed as they stand, by a person or an agen
    ([Moving an ongoing project](#moving-an-ongoing-project-from-nnn--numbering)), never part of the
    install.
 
-9. **Report.** Show the user `git status --short`. The install adds or changes `.specify/` and each
-   integration's command folder (the folders the installer printed in step 5, plus the default
-   integration's, such as `.claude/skills/`); a fresh Spec Kit setup also adds the integration folders
-   themselves. These are meant to be committed so the whole team gets the same commands. Spec Kit may
-   suggest adding agent folders to `.gitignore` because they can hold personal settings and credentials:
-   commit the command folders, and if personal files such as `.claude/settings.local.json` appear in
-   `git status`, point them out so the user can ignore them. On Windows with `core.autocrlf=true`, files
-   can show as modified while `git diff` is empty: only their line endings differ, and `git add` clears
-   them with nothing to commit. The same effect makes `specify integration upgrade` claim command files
-   were modified since installation, and it exits 0 without upgrading; check `git diff` before using
-   `--force`. Committing is the user's call. Start a new
-   agent session if the new commands do not appear.
+9. **Report.** Show the user `git status --short`. `.specify/feature.json`, which `specify` rewrites on
+   each run, is local state rather than part of a spec; projects may git-ignore it. The install adds or
+   changes `.specify/` and each integration's command folder (the folders the installer printed in step 5,
+   plus the default integration's, such as `.claude/skills/`); a fresh Spec Kit setup also adds the
+   integration folders themselves. These are meant to be committed so the whole team gets the same
+   commands. Spec Kit may suggest adding agent folders to `.gitignore` because they can hold personal
+   settings and credentials: commit the command folders, and if personal files such as
+   `.claude/settings.local.json` appear in `git status`, point them out so the user can ignore them. On
+   Windows with `core.autocrlf=true`, files can show as modified while `git diff` is empty: only their
+   line endings differ, and `git add` clears them with nothing to commit. The same effect makes
+   `specify integration upgrade` claim command files were modified since installation, and it exits 0 without
+   upgrading; check `git diff` before using `--force`. Committing is the user's call. Start a new agent
+   session if the new commands do not appear.
 
 ### How the installer works
 

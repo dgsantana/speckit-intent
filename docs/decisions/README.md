@@ -50,6 +50,7 @@ A concrete trigger, not "if needed".
 | [0010 An order of authority and five reasons to stop](0010-when-to-stop-and-ask.md) | amended by 0012, 0013 |
 | [0011 Two sizes: small and normal](0011-two-sizes.md) | active |
 | [0012 Friction fixes from the 2026-10-07 review](0012-review-friction-fixes.md) | active |
-| [0013 Build rules live in tasks.md; Results only from verify](0013-build-rules-in-tasks.md) | amended by 0015 |
-| [0014 What a hand-written small-work record taught the preset](0014-lessons-from-small-work-records.md) | active |
-| [0015 Verify catches regressions and keeps the history](0015-verify-regressions-and-history.md) | active |
+| [0013 Build rules live in tasks.md; Results only from verify](0013-build-rules-in-tasks.md) | amended by 0015, 0016 |
+| [0014 What a hand-written small-work record taught the preset](0014-lessons-from-small-work-records.md) | amended by 0016 |
+| [0015 Verify catches regressions and keeps the history](0015-verify-regressions-and-history.md) | amended by 0016 |
+| [0016 Field-report rules after 0015, and a trim](0016-field-rules-and-trim.md) | active |

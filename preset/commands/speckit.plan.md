@@ -47,7 +47,8 @@ pwsh -NoProfile -File .specify/extensions/intent/scripts/powershell/target-hash.
 ```
 
 Never re-record without the Target changes line. A recorded hash that no longer matches, with no line explaining
-the difference, is how a silent change to the target is found.
+the difference, is how a silent change to the target is found. A `small` spec has no hash and no Target
+changes section; edit it directly, and a loosening still needs the user's confirmation.
 
 ## Steps
 
@@ -109,5 +110,6 @@ the difference, is how a silent change to the target is found.
 ## Report
 
 The plan path, the outcomes with the changes serving each, any spec changes, any unexplained target
-change found, any decision records written or superseded, and the next step:
+change found, any decision records written or superseded, a branch that is not this work's, and the next
+step:
 `__SPECKIT_COMMAND_TASKS__`.

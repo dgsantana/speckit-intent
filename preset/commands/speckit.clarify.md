@@ -51,7 +51,8 @@ pwsh -NoProfile -File .specify/extensions/intent/scripts/powershell/target-hash.
 ```
 
 Never re-record without the Target changes line. A recorded hash that no longer matches, with no line explaining
-the difference, is how a silent change to the target is found.
+the difference, is how a silent change to the target is found. A `small` spec has no hash and no Target
+changes section; edit it directly, and a loosening still needs the user's confirmation.
 
 ## Steps
 
@@ -69,12 +70,13 @@ the difference, is how a silent change to the target is found.
    outcome. If a question would be clearer shown than described (a layout, a diagram, visual options side by
    side) and the companion extension is installed, use `__SPECKIT_COMMAND_COMPANION_SHOW__` for it.
 
-4. Write each answer where it belongs: in the outcome, check, constraint, edge case or Evidence entry it
-   settles, not in a separate clarifications section. Remove the Open question it answers. An answer
-   that loosens an outcome or its check is the user's decision by construction, so it may be applied.
-   After planning, record the edit as Changing the target describes.
+4. Write each answer where it belongs: in the outcome, check, constraint, edge case, Evidence entry or
+   Decided line (a choice among options) it settles, not in a separate clarifications section. Remove the
+   Open question it answers. An answer that loosens an outcome or its check is the user's decision by
+   construction, so it may be applied. After planning, record the edit as Changing the target describes.
 
-5. Keep the spec's sections as the template has them; add none.
+5. Keep the spec's sections as the template has them; a section removed as empty (Decided, for one) comes
+   back when an answer belongs in it.
 
 ## Report
 

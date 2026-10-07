@@ -1,6 +1,6 @@
 # 0014. What a hand-written small-work record taught the preset
 
-Status: active
+Status: active, amended by [0016](0016-field-rules-and-trim.md)
 Date: 2026-10-07
 
 ## Intent

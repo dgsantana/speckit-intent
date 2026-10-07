@@ -52,8 +52,7 @@ it or change it; do not ask the user to rank a list.
    Then, either way: create the directory, copy the resolved `spec-template` (the preset stack's, as
    `specify preset resolve spec-template` reports) to `spec.md`, and write
    `{"feature_directory": "<that path>"}` to `.specify/feature.json`. A hook only names the directory;
-   this command creates it. One feature per invocation. This command creates no git branch; say which
-   branch the work is on.
+   this command creates it, and creates no git branch. One feature per invocation.
 
 2. **Read before writing.** Load `.specify/memory/constitution.md` if present, and skim the project's own
    docs index and any decision records the description touches. Look at the code the description names:
@@ -68,12 +67,12 @@ it or change it; do not ask the user to rank a list.
 4. **Fill the template.** Keep Goal, Outcomes and Results; remove every other section that would be empty.
    - Goal: who needs it and the trigger.
    - Outcomes: each observable, with numbers where they matter, each with a check (test, command or
-     measurement and its pass threshold), which must be able to run on what the outcome names (a release
-     build writes no debug log). A check that is a person's observation states the exact steps: the mode
-     or path, the input, and what to look for, in the same form the outcome names, so the observer gets it
-     right the first time. Prefer few strong outcomes over many weak ones. Behaviour that
-     must stay the same for existing inputs is an `Unchanged:` outcome. For a bug, the outcome is a
-     single `Never:` one: the reported behaviour does not occur. For other work, add a `Never:` outcome
+     measurement and its pass threshold) that can run on what the outcome names (a release build writes
+     no debug log). A person's observation gives exact steps (mode or path, input, what to look for). A
+     check says what its data is, and leaves the evidence intact (it works on a copy of anything it
+     writes). Prefer few strong outcomes over many weak ones. Behaviour that must stay the same for
+     existing inputs is an `Unchanged:` outcome. For a bug, the outcome is a single `Never:` one: the
+     reported behaviour does not occur. For other work, add a `Never:` outcome
      only for a failure a skeptical reviewer would try that no other outcome already rules out.
    - Decided: choices the user has already made that the work must follow, with the options not taken.
    - Constraints, out of scope, edge cases: one line each. An edge case whose wrong handling would miss
@@ -94,5 +93,5 @@ it or change it; do not ask the user to rank a list.
 
 ## Report
 
-The feature directory, the size and why, the outcomes in one line each, any open questions (asked as Asking the user
-describes), and the next step: `__SPECKIT_COMMAND_PLAN__`.
+The feature directory, the branch the work is on, the size and why, the outcomes in one line each, any
+open questions (asked as Asking the user describes), and the next step: `__SPECKIT_COMMAND_PLAN__`.

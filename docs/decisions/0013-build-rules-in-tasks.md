@@ -1,6 +1,6 @@
 # 0013. Build rules live in tasks.md; Results only from verify
 
-Status: active, amended by [0015](0015-verify-regressions-and-history.md)
+Status: active, amended by [0015](0015-verify-regressions-and-history.md), [0016](0016-field-rules-and-trim.md)
 Date: 2026-10-07
 
 ## Intent

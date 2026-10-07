@@ -5,8 +5,8 @@ BeforeDiscovery {
     $commands = @(Get-ChildItem -Path (Join-Path $repo 'preset'), (Join-Path $repo 'extensions') -Filter '*.md' -Recurse |
         Where-Object { $_.Directory.Name -eq 'commands' } |
         ForEach-Object { @{ Name = $_.BaseName; Path = $_.FullName } })
-    # Commands that never ask the user anything. A new command either carries the rule or is listed here.
-    $silent = @('speckit.feature-id.allocate', 'speckit.converge')
+    # Commands that ask nothing beyond a yes/no go-ahead. A new command either carries the rule or is listed here.
+    $silent = @('speckit.feature-id.allocate', 'speckit.converge', 'speckit.analyze')
     $asking = @($commands | Where-Object { $_.Name -notin $silent })
     # Commands that may edit a spec's Outcomes or Constraints after planning.
     $editing = @('speckit.clarify', 'speckit.plan', 'speckit.tasks', 'speckit.intent.verify', 'speckit.companion.show')

@@ -40,7 +40,8 @@ pwsh -NoProfile -File .specify/extensions/intent/scripts/powershell/target-hash.
 ```
 
 Never re-record without the Target changes line. A recorded hash that no longer matches, with no line explaining
-the difference, is how a silent change to the target is found.
+the difference, is how a silent change to the target is found. A `small` spec has no hash and no Target
+changes section; edit it directly, and a loosening still needs the user's confirmation.
 
 ## Start
 
@@ -74,8 +75,8 @@ tab reconnects on the same port, and every later step uses the new `screen_dir` 
 ## Record what it settled
 
 A choice the user made in the browser is the user's decision, so it applies directly, a loosened outcome
-included; say what it changed. It leaves the same trail as any other decision. The feature directory is
-the one `.specify/feature.json` names.
+included; tell the user what it changed in the spec. It leaves the same trail as any other decision. The
+feature directory is the one `.specify/feature.json` names.
 
 - If it changes what the feature must do, write it into the spec as an outcome, constraint or edge case;
   after planning, record it as Changing the target describes.

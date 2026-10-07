@@ -30,5 +30,5 @@ answered question is not asked again.
 
 Verification is not a task: the intent extension runs every outcome's check after `implement` and writes
 the spec's Results. If these tasks were done outside `implement`, run the intent extension's verify
-command before calling the work done. Results are written only by it; a measured result is recorded
-there once, and task notes link to it rather than repeat it.
+command before calling the work done. Results are written only by it; a task note links to a Results
+row rather than repeating its numbers.

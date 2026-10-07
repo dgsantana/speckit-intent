@@ -26,16 +26,6 @@ not run. After reporting, do the same for `hooks.after_analyze`.
 Read-only. Report disagreements between the artifacts, and between them and the code they name; change
 nothing. A finding is concrete: the line, what it says, what contradicts it.
 
-## Asking the user
-
-Ask through the agent's structured question tool when it has one (`AskUserQuestion` in Claude Code, the
-equivalent tool in other agents): one decision per question, two to four options, your recommendation
-first and marked as such, one line on each option's consequence. Questions whose answers do not depend on
-each other may share one call. Without such a tool, ask in plain text: the question, then a short
-numbered list with the recommendation first. Never print a table of lettered options for the user to
-type a letter back. To settle an order (which tasks or items first), propose one and ask whether to keep
-it or change it; do not ask the user to rank a list.
-
 ## Steps
 
 1. Run `{SCRIPT}` from the repository root and parse FEATURE_DIR and AVAILABLE_DOCS. Read spec.md,
