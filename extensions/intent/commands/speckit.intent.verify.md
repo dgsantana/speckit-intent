@@ -63,7 +63,9 @@ the difference, is how a silent change to the target is found.
    it as not run, with what is needed.
 
    Then check the spec's Constraints that this work could have broken, and existing behaviour near the
-   change. A regression is a failure of the work even when no outcome names it: record it as a Fail row
+   change. Read the diff for changes that reach beyond what the tasks name (a scripted or repeated edit
+   that also changed another call site): a check can pass while the behaviour it stands for no longer
+   holds there. A regression is a failure of the work even when no outcome names it: record it as a Fail row
    for the constraint, or add an `Unchanged:` outcome that holds the behaviour (a tightening, recorded as
    Changing the target describes) and record it as failing. Only a gap the work did not cause goes under
    "found, not fixed".
