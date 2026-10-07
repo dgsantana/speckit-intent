@@ -21,7 +21,8 @@
     Compute the hash and write it to the frontmatter as `target_hash`.
 
 .PARAMETER Check
-    Compare the recorded hash with the current one. Exit code 0: match; 1: changed; 2: none recorded.
+    Compare the recorded hash with the current one. Exit code 1 when it changed; 0 otherwise, including
+    when none was recorded (a small spec, or one planned before the hash existed). STATUS says which.
 #>
 [CmdletBinding()]
 param(
@@ -88,4 +89,4 @@ $status = if (-not $stored.Success) { 'unrecorded' } elseif ($stored.Groups[1].V
     COMPUTED = $hash
     SPEC     = $Spec
 } | ConvertTo-Json -Compress
-exit @{ match = 0; changed = 1; unrecorded = 2 }[$status]
+exit @{ match = 0; changed = 1; unrecorded = 0 }[$status]

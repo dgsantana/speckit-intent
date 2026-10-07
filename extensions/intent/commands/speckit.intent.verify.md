@@ -57,8 +57,16 @@ the difference, is how a silent change to the target is found.
 2. For each outcome in the spec's Outcomes table, run its check exactly as written: the named test, the
    command, the measurement. A check that is a person's observation (a visual result, a manual flow, a
    packaged build) is run by asking the user to do it or to confirm what they saw, and recorded with who,
-   when and the artifact (a screenshot, a log), checked by `user`. If a check cannot run at all (missing
-   data, hardware, nobody to observe it), say so and record it as not run, with what is needed.
+   when and the artifact (a screenshot, a log), checked by `user`. A check too long to repeat here (a long
+   measurement run) may use this build's own run of it, named with where and when it ran and the code it
+   ran on. If a check cannot run at all (missing data, hardware, nobody to observe it), say so and record
+   it as not run, with what is needed.
+
+   Then check the spec's Constraints that this work could have broken, and existing behaviour near the
+   change. A regression is a failure of the work even when no outcome names it: record it as a Fail row
+   for the constraint, or add an `Unchanged:` outcome that holds the behaviour (a tightening, recorded as
+   Changing the target describes) and record it as failing. Only a gap the work did not cause goes under
+   "found, not fixed".
 
 3. Judge each against its threshold:
    - **Pass**: the check ran and met it.
@@ -103,8 +111,10 @@ the difference, is how a silent change to the target is found.
    Verification is not a task in tasks.md; tick nothing there.
 
 8. Move any claim in the spec's Evidence section whose tier changed (an assumption now measured, or one
-   found wrong) and correct it where it is written. Results is where a measured number lives: an Evidence
-   line, a task note or a decision record points to the Results row instead of repeating it. If a result
+   found wrong) and correct it where it is written. Results is where the measured result of checking an
+   outcome lives: a task note, a decision record or an Evidence line about the same measurement points to
+   the Results row instead of repeating it. Measurements taken before the change, the facts that
+   motivated the work, stay in Evidence. If a result
    contradicts the Evidence of a decision record the plan links, or meets that record's "Revisit when"
    trigger, say so in the report.
 

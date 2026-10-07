@@ -44,11 +44,12 @@ A concrete trigger, not "if needed".
 | [0004 Vendor the Superpowers visual companion](0004-vendor-visual-companion.md) | active |
 | [0005 Decision records stay in this repository](0005-decision-records-not-shipped.md) | superseded by 0006 |
 | [0006 Ship lean decision records in the preset](0006-ship-decision-records.md) | amended by 0012 |
-| [0007 Detect changes to the target with a hash](0007-target-hash.md) | amended by 0012 |
+| [0007 Detect changes to the target with a hash](0007-target-hash.md) | amended by 0012, 0015 |
 | [0008 Failure conditions as Never: outcomes](0008-never-outcomes.md) | active |
 | [0009 Independent verification is opt-in](0009-optional-independent-verify.md) | active |
 | [0010 An order of authority and five reasons to stop](0010-when-to-stop-and-ask.md) | amended by 0012, 0013 |
 | [0011 Two sizes: small and normal](0011-two-sizes.md) | active |
 | [0012 Friction fixes from the 2026-10-07 review](0012-review-friction-fixes.md) | active |
-| [0013 Build rules live in tasks.md; Results only from verify](0013-build-rules-in-tasks.md) | active |
+| [0013 Build rules live in tasks.md; Results only from verify](0013-build-rules-in-tasks.md) | amended by 0015 |
 | [0014 What a hand-written small-work record taught the preset](0014-lessons-from-small-work-records.md) | active |
+| [0015 Verify catches regressions and keeps the history](0015-verify-regressions-and-history.md) | active |

@@ -101,8 +101,9 @@ Describe 'target hash' {
 
     It 'reports a spec whose target was never recorded' {
         $spec = New-Spec $base
+        # Not a failure: a spec planned before the hash existed, or a small one, has none.
         $check = Invoke-Hash $spec 'Check'
-        $check.ExitCode | Should -Be 2
+        $check.ExitCode | Should -Be 0
         $check.Result.STATUS | Should -Be 'unrecorded'
     }
 }

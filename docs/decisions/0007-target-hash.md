@@ -1,6 +1,6 @@
 # 0007. Detect changes to the target with a hash
 
-Status: active, amended by [0012](0012-review-friction-fixes.md)
+Status: active, amended by [0012](0012-review-friction-fixes.md), [0015](0015-verify-regressions-and-history.md)
 Date: 2026-10-07
 
 ## Intent
