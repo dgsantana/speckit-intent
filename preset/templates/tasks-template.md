@@ -13,7 +13,8 @@ the check it adds or runs.
 The constitution, the spec's Outcomes, Decided and Constraints, and decision records belong to the user;
 the plan and these tasks belong to the builder, and are the ones fixed when they disagree with the
 user's. A task
-found wrong while building is corrected here, in place, with one line on why: the outcome decides. Stop
+found wrong while building is corrected here, in place, with an indented line under it saying why: the
+outcome decides. Stop
 and ask the user once, only for: **ambiguity** (an outcome reads two ways that lead to different work),
 **conflict** (two things the user owns disagree, or a decision record would have to be replaced),
 **target** (an outcome must be loosened), an **irreversible** action, or being **stuck** after several

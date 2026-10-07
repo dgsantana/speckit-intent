@@ -240,6 +240,18 @@ try {
     $kept = @()
     $notUtf8 = @()
     $unresolved = @()
+    $foreignRefs = @()
+
+    # A legacy-shaped `specs/NNN-slug` that names no directory here: a spec planned but never created, or
+    # another repository's spec.
+    $missingPattern = [regex]::new('(?<![A-Za-z0-9_-])specs[\\/](?<name>\d{3}-[A-Za-z0-9][A-Za-z0-9-]*)')
+    $localNames = [Collections.Generic.HashSet[string]]::new([string[]]@($features | ForEach-Object Name))
+
+    function Test-ForeignBefore([string]$Line, [int]$Index) {
+        if (-not $foreignPattern) { return $false }
+        $start = [Math]::Max(0, $Index - $foreignWindow)
+        return $foreignPattern.IsMatch($Line.Substring($start, $Index - $start))
+    }
     foreach ($relative in $candidates) {
         if ($binaryExtensions -contains [IO.Path]::GetExtension($relative).ToLowerInvariant()) { continue }
 
@@ -307,12 +319,19 @@ try {
             continue
         }
 
-        if ($leftoverPattern) {
-            $lines = $updated -split "`n"
-            for ($i = 0; $i -lt $lines.Count; $i++) {
-                if ($leftoverPattern.IsMatch($lines[$i])) {
-                    $unresolved += [pscustomobject]@{ FILE = $relative; LINE = $i + 1; TEXT = $lines[$i].Trim() }
-                }
+        # What is left for a person, by line: a reference written right after -Foreign is listed as FOREIGN
+        # (another repository's, to update from its own mapping), anything else as UNRESOLVED.
+        $lines = $updated -split "`n"
+        for ($i = 0; $i -lt $lines.Count; $i++) {
+            $found = @()
+            if ($leftoverPattern) { $found += @($leftoverPattern.Matches($lines[$i])) }
+            $found += @($missingPattern.Matches($lines[$i]) | Where-Object { -not $localNames.Contains($_.Groups['name'].Value) })
+            if ($found.Count -eq 0) { continue }
+            $entry = [pscustomobject]@{ FILE = $relative; LINE = $i + 1; TEXT = $lines[$i].Trim() }
+            if (@($found | Where-Object { -not (Test-ForeignBefore $lines[$i] $_.Index) }).Count -gt 0) {
+                $unresolved += $entry
+            } else {
+                $foreignRefs += $entry
             }
         }
         if ($hits.Count -eq 0) { continue }
@@ -349,6 +368,7 @@ try {
         KEPT    = @($kept)
         NOT_UTF8 = @($notUtf8)
         UNRESOLVED = @($unresolved)
+        FOREIGN = @($foreignRefs)
     }
 
     if ($Json) {
@@ -363,6 +383,11 @@ try {
             Write-Output ''
             Write-Output "Files left with old names (-Keep): $($kept.Count)"
             foreach ($path in $kept) { Write-Output "  $path" }
+        }
+        if ($foreignRefs.Count -gt 0) {
+            Write-Output ''
+            Write-Output "References to another repository's specs (-Foreign), left as they are: $($foreignRefs.Count)"
+            foreach ($entry in $foreignRefs) { Write-Output "  $($entry.FILE):$($entry.LINE)  $($entry.TEXT)" }
         }
         if ($unresolved.Count -gt 0) {
             Write-Output ''

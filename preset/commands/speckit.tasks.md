@@ -69,8 +69,8 @@ the difference, is how a silent change to the target is found.
      success) does not count as a check.
    - Each task is small enough to finish and verify on its own.
    - A task that depends on an Evidence claim tagged `assumption` starts by measuring it. If the
-     measurement contradicts the claim, the outcome decides: correct the task in place with one line on
-     why, and move the claim to `measured` in Evidence.
+     measurement contradicts the claim, the outcome decides: correct the task in place, with an indented
+     line under it saying why, and move the claim to `measured` in Evidence.
    - Keep the template's "When to stop and ask" section as it is for a `normal` spec, since building
      reads it from tasks.md; remove it for a `small` one. Keep the Done section, which says to run
      `__SPECKIT_COMMAND_INTENT_VERIFY__` when the tasks were done outside `implement`.

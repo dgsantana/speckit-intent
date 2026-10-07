@@ -282,22 +282,28 @@ allocator only creates dated IDs, and the two coexist. Migrating renames them so
 way.
 
 1. **Pick the moment.** Run it on the integration branch (`dev`, `develop`), with no uncommitted work.
-   Open feature branches are easiest to bring across when they are few.
+   Open feature branches are easiest to bring across when they are few. If you have just installed or
+   reinstalled speckit-intent, commit that first: the install changes tracked files, and `-Apply`
+   refuses a tree with tracked changes.
 2. **Dry run**, and read the list of renames and of files whose references will be rewritten:
    ```text
    pwsh -NoProfile -File .specify/extensions/feature-id/scripts/powershell/migrate-feature-ids.ps1
    ```
    Dates come from the oldest commit on any branch that added each `spec.md`, so every branch derives the
-   same names.
+   same names. Changelogs and `history/` folders are left alone (`-Keep` changes the patterns), because
+   they describe what happened under the old names. Installed tool files under `.specify/extensions/` and
+   `.specify/presets/` are never rewritten.
 
-   Short references such as `specs/021` are rewritten too, when one directory has that number. Prose
-   ("spec 021", "specification 021"), a number two directories share, and a path into another tree
-   (`../other/specs/021`) are listed under UNRESOLVED for a person to fix. If the repository's documents
-   cite another repository's specs by number, pass `-Foreign '<pattern>'` (for example `'ACME|AcmeCorp/'`)
-   so a short reference written right after it (as in `` `AcmeCorp/acme` `specs/001` ``) is listed instead of
-   rewritten: the number may be theirs. Elsewhere on the same line, references are still rewritten.
-   Installed tool files under `.specify/extensions/` and `.specify/presets/` are never rewritten. Changelogs and `history/` folders are left alone (`-Keep` changes the patterns), because
-   they describe what happened under the old names.
+   Short references such as `specs/021` are rewritten too, when one directory has that number. Listed
+   under UNRESOLVED, for a person to fix: prose ("spec 021", "specification 021"), a number two
+   directories share, a path into another tree (`../other/specs/021`), and a `specs/NNN-slug` that names
+   no directory here (a spec planned but never created).
+
+   If the repository's documents cite another repository's specs, pass `-Foreign '<pattern>'` (for
+   example `'ACME|AcmeCorp/'`). A reference written right after the pattern (as in
+   `` `AcmeCorp/acme` `specs/001` ``) is left alone and listed under FOREIGN, since the number may be theirs;
+   update those from the other repository's mapping file once it migrates. Elsewhere on the same line,
+   references are still rewritten.
 3. **Apply and commit** the renames, the rewritten references and `.specify/feature-id-migration.json`
    together, as one commit that does nothing else:
    ```text

@@ -104,6 +104,8 @@ the difference, is how a silent change to the target is found.
    not written by this command: replace it if its outcome was checked in this run, otherwise mark it
    `not verified` and say so in the report. Each row's evidence says where the check ran and what that
    cannot prove (for example "local build, not a clean machine"); a Pass with a stated limit stays a Pass.
+   When a check had to be run again because an attempt was invalid (the wrong installer, the wrong
+   build), the row records the valid run and one line on why the earlier attempt does not count.
    Below the table, one line per noteworthy finding: a surprise, a correction to the Evidence section, a
    follow-up, or a gap found outside this work and left unfixed ("found, not fixed"), with where it
    belongs.
@@ -126,3 +128,6 @@ the difference, is how a silent change to the target is found.
 The results table, the status, for each outcome that did not pass what would make it pass, and any
 decision record to revisit. When the results were checked by the builder alone, say so in one line, and
 that `__SPECKIT_COMMAND_INTENT_VERIFY__ independent` adds a second agent's check at extra token cost.
+If the user names new behaviour while reviewing the results, it is a change to the target: add the
+outcome as Changing the target describes, then `__SPECKIT_COMMAND_CONVERGE__` appends its tasks, then
+`__SPECKIT_COMMAND_IMPLEMENT__`, which verifies again.

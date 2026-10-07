@@ -52,6 +52,8 @@ the difference, is how a silent change to the target is found.
 ## Steps
 
 1. Run `{SCRIPT}` from the repository root and parse FEATURE_SPEC, IMPL_PLAN, FEATURE_DIR and BRANCH.
+   BRANCH is a suggested name only; the script creates no branch. If the project works on feature
+   branches and the current branch is not one for this work, say so in the report.
 
 2. Load the spec, `.specify/memory/constitution.md` if present, and the code and decision records the
    spec touches. Read the code before planning changes to it.
@@ -63,7 +65,8 @@ the difference, is how a silent change to the target is found.
    would be empty.
    - Approach: how the outcomes are reached. Interfaces, signatures and pseudo-code only; no full
      implementations.
-   - Changes: every file or module touched, with the outcomes it serves. An outcome nothing serves is a gap;
+   - Changes: every file or module touched, with the outcomes it serves, including new test
+     infrastructure a check needs (it serves that check's outcome). An outcome nothing serves is a gap;
      a change that serves no outcome is scope creep. Fix either before continuing.
    - Choices: only those hard to reverse or likely to be re-litigated, each with the rejected alternative
      and why. Choices the spec lists under Decided are the user's; follow them, do not repeat them here.

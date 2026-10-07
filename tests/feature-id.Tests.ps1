@@ -147,6 +147,8 @@ Describe 'migration' {
             'Elsewhere: ../acme/specs/021 belongs to another repository.'
             'Foreign: ACME specs/021 is theirs.'
             'Same line, not adjacent: the ACME world data bundle is described in specs/021.'
+            'Planned: specs/005-orientation-suggestion does not exist yet.'
+            'Theirs: ACME specs/004-embedded-import-view.'
         )
         $tool = Join-Path $root '.specify/extensions/feature-id/scripts/powershell'
         New-Item -ItemType Directory -Path $tool -Force | Out-Null
@@ -169,8 +171,9 @@ Describe 'migration' {
         $lines[6] | Should -Be "Same line, not adjacent: the ACME world data bundle is described in specs/$launcher."
         Get-Content -LiteralPath (Join-Path $tool 'example.ps1') | Should -Be '# `specs/021` means 021-launcher-page.'
 
-        $unresolved = ($result.Output | ConvertFrom-Json).UNRESOLVED
-        ($unresolved | Where-Object { $_.FILE -eq 'notes.md' }).LINE | Sort-Object | Should -Be @(3, 4, 5, 6)
+        $report = $result.Output | ConvertFrom-Json
+        ($report.UNRESOLVED | Where-Object { $_.FILE -eq 'notes.md' }).LINE | Sort-Object | Should -Be @(3, 4, 5, 8)
+        ($report.FOREIGN | Where-Object { $_.FILE -eq 'notes.md' }).LINE | Sort-Object | Should -Be @(6, 9)
     }
 
     It 'refuses two legacy directories that would take the same name, and moves nothing' {
