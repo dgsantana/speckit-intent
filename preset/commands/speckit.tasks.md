@@ -34,6 +34,19 @@ numbered list with the recommendation first. Never print a table of lettered opt
 type a letter back. To settle an order (which tasks or items first), propose one and ask whether to keep
 it or change it; do not ask the user to rank a list.
 
+## Changing the target
+
+Once the spec has a `target_hash` (`plan` records it), its Outcomes and Constraints are the agreed target.
+Any edit to them, tightening or loosening, adds one line to the spec's Target changes section (date, item, what
+changed, tightened or loosened, who confirmed a loosening) and then re-records the hash:
+
+```text
+pwsh -NoProfile -File .specify/extensions/intent/scripts/powershell/target-hash.ps1 -Record
+```
+
+Never re-record without the Target changes line. A recorded hash that no longer matches, with no line explaining
+the difference, is how a silent change to the target is found.
+
 ## Steps
 
 1. Run `{SCRIPT}` from the repository root and parse FEATURE_DIR, TASKS_TEMPLATE_CONTENT (or read
@@ -47,8 +60,11 @@ it or change it; do not ask the user to rank a list.
    - Group tasks so each group reaches an outcome end to end, the most valuable first. No empty phases.
    - Where an outcome has an automated check, the task adding that check comes before the change that
      satisfies it, and the check must fail without the change. An `Unchanged:` outcome is the exception:
-     its check must pass before the change and still pass after it. A test that only shows something
-     exists (a file written, a value constructed, a call returning success) does not count as a check.
+     its check must pass before the change and still pass after it. A `Never:` check fails without the
+     change when the failure happens today (a bug); when it cannot happen yet, it is written with the
+     change that rules it out, and must exercise the path where the failure would occur. A test that
+     only shows something exists (a file written, a value constructed, a call returning success) does not
+     count as a check.
    - Each task is small enough to finish and verify on its own.
    - No verification task: `__SPECKIT_COMMAND_INTENT_VERIFY__` runs every outcome's check after
      implementation, as the intent extension's `after_implement` hook.
@@ -58,7 +74,8 @@ it or change it; do not ask the user to rank a list.
 
 5. If a task cannot be written without changing an outcome or its check, stop and ask the user when the
    change loosens it (drops it, lowers a threshold, narrows what the check covers). Tightening it or
-   correcting a check that tests the wrong thing needs no confirmation; record either in the spec.
+   correcting a check that tests the wrong thing needs no confirmation; record either as Changing the
+   target describes.
 
 ## Report
 

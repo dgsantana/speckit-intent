@@ -64,7 +64,12 @@ it or change it; do not ask the user to rank a list.
      measurement and its pass threshold). Prefer few strong outcomes over many weak ones.
      Behaviour that must stay the same for existing inputs is an outcome too, with its own check; start
      its text with `Unchanged:` so later steps know its check passes before the change as well as after.
-   - Constraints, out of scope, edge cases: one line each.
+     A way the intent could be missed even when the other outcomes look met (a session still valid after
+     logout; for a bug, the reported behaviour) is an outcome starting with `Never:`, whose check tries to
+     cause it and passes when it cannot. Write only the ones a skeptical reviewer would try; the plain
+     negation of another outcome adds nothing.
+   - Constraints, out of scope, edge cases: one line each. An edge case whose wrong handling would miss
+     the intent becomes an outcome, usually `Never:`.
    - Evidence: tag every claim measured, documented or assumption. Do not promote an assumption to fact
      without a measurement.
    - Open questions: at most three, only where the answer changes an outcome. For anything else, choose a

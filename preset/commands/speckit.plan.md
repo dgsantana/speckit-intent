@@ -34,6 +34,19 @@ numbered list with the recommendation first. Never print a table of lettered opt
 type a letter back. To settle an order (which tasks or items first), propose one and ask whether to keep
 it or change it; do not ask the user to rank a list.
 
+## Changing the target
+
+Once the spec has a `target_hash` (`plan` records it), its Outcomes and Constraints are the agreed target.
+Any edit to them, tightening or loosening, adds one line to the spec's Target changes section (date, item, what
+changed, tightened or loosened, who confirmed a loosening) and then re-records the hash:
+
+```text
+pwsh -NoProfile -File .specify/extensions/intent/scripts/powershell/target-hash.ps1 -Record
+```
+
+Never re-record without the Target changes line. A recorded hash that no longer matches, with no line explaining
+the difference, is how a silent change to the target is found.
+
 ## Steps
 
 1. Run `{SCRIPT}` from the repository root and parse FEATURE_SPEC, IMPL_PLAN, FEATURE_DIR and BRANCH.
@@ -50,6 +63,7 @@ it or change it; do not ask the user to rank a list.
      and why. A spec Constraint that records a choice and the options not taken becomes a Choice here.
    - Risks: what could make an outcome fail, and how the work finds out early.
    - If the constitution's rules conflict with the plan, name the conflict; do not paper over it.
+   - Keep the template's "When to stop and ask" section as it is: the build reads it from the plan.
    - If a question would be clearer shown than described (a layout, a diagram, visual options side by
      side) and the companion extension is installed, use `__SPECKIT_COMMAND_COMPANION_SHOW__` for it.
 
@@ -70,9 +84,14 @@ it or change it; do not ask the user to rank a list.
 6. If planning reveals that an outcome or its check is wrong or unreachable, do not let the plan drift away
    from it silently. A change that loosens it (drops it, lowers a threshold, narrows what the check
    covers) needs the user's confirmation before the spec is edited: ask, with the evidence. Tightening it
-   or correcting a check that tests the wrong thing needs none. Either way, record the change in the spec.
+   or correcting a check that tests the wrong thing needs none. Either way, record it as Changing the
+   target describes.
 
-7. Set the spec's `status` to `planned`.
+7. Set the spec's `status` to `planned`, then settle the target hash with the script in Changing the
+   target. If the spec has no `target_hash`, run it with `-Record`. If it has one, run it with `-Check`
+   first: on `changed`, find the edits with `git log -p -- <spec>` and `git diff -- <spec>`, and the
+   Target changes line that explains each. If one is missing, report it, and record only after the user
+   confirms the spec as it stands is the target.
 
 ## Report
 

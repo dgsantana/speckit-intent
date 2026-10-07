@@ -29,6 +29,19 @@ numbered list with the recommendation first. Never print a table of lettered opt
 type a letter back. To settle an order (which tasks or items first), propose one and ask whether to keep
 it or change it; do not ask the user to rank a list.
 
+## Changing the target
+
+Once the spec has a `target_hash` (`plan` records it), its Outcomes and Constraints are the agreed target.
+Any edit to them, tightening or loosening, adds one line to the spec's Target changes section (date, item, what
+changed, tightened or loosened, who confirmed a loosening) and then re-records the hash:
+
+```text
+pwsh -NoProfile -File .specify/extensions/intent/scripts/powershell/target-hash.ps1 -Record
+```
+
+Never re-record without the Target changes line. A recorded hash that no longer matches, with no line explaining
+the difference, is how a silent change to the target is found.
+
 ## Start
 
 From the project root, with the platform's background mechanism if it reaps detached processes:
@@ -64,7 +77,8 @@ A choice the user made in the browser is the user's decision, so it applies dire
 included; say what it changed. It leaves the same trail as any other decision. The feature directory is
 the one `.specify/feature.json` names.
 
-- If it changes what the feature must do, write it into the spec as an outcome, constraint or edge case.
+- If it changes what the feature must do, write it into the spec as an outcome, constraint or edge case;
+  after planning, record it as Changing the target describes.
 - If it is a design choice that is hard to reverse or likely to be re-litigated, add it to the plan's
   Choices with the options not taken as the rejected alternatives and why the user preferred this one.
   Before a plan exists, write it as a spec Constraint naming the options not taken; planning carries it

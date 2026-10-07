@@ -40,10 +40,17 @@ it or change it; do not ask the user to rank a list.
    plan.md, tasks.md, `.specify/memory/constitution.md` if present, and any document the plan links.
 
 2. Check, and record each failure with its location:
+   - **Target**: run
+     `pwsh -NoProfile -File .specify/extensions/intent/scripts/powershell/target-hash.ps1 -Check`.
+     `changed` with a difference that no line in the spec's Target changes section explains is a high
+     finding (find the edits with `git log -p -- <spec>` and
+     `git diff -- <spec>`); `unrecorded` after planning is a medium one.
    - **Coverage**: every outcome is served by a plan Change and by at least one task; every Change and task
      names an outcome that exists.
    - **Checks**: every outcome has a check with a pass threshold; for each non-`Unchanged:` outcome with an
-     automated check, a task adds that check before the task that satisfies it.
+     automated check, a task adds that check before the task that satisfies it (a `Never:` check may come
+     with the change when its failure cannot happen yet). A `Never:` check must try to cause the failure
+     it names, not only test the happy path.
    - **Format**: every task line is `- [ ] T### [P?] [O#,...] Description with file path`, numbered in
      order.
    - **Consistency**: no constraint is broken by a plan Change; no plan Choice contradicts the spec or a

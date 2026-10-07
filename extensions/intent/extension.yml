@@ -17,6 +17,11 @@ provides:
     - name: speckit.intent.verify
       file: commands/speckit.intent.verify.md
       description: "Check each outcome of the current spec and record results with evidence"
+  scripts:
+    - name: target-hash
+      file: scripts/powershell/target-hash.ps1
+      description: "Record or check the hash of a spec's Outcomes and Constraints"
+      runtimes: [powershell]
 
 hooks:
   after_implement:

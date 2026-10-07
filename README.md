@@ -40,9 +40,11 @@ that upstream changes to the replaced commands do not flow in; review the Spec K
 **spec.md**: frontmatter `id` and `status` (`draft`, `planned`, `verified`, `partial`, `failed`, and
 `dropped` set by hand);
 Goal; an Outcomes table where every outcome carries its check, with behaviour that must not change
-written as `Unchanged:` outcomes; Constraints; Out of scope;
+written as `Unchanged:` outcomes and ways the intent could still be missed as `Never:` outcomes;
+Constraints; Out of scope;
 Edge cases; Evidence tagged `measured`, `documented` or `assumption`; at most three Open questions;
-Results, filled only by verification.
+Target changes, logged when Outcomes or Constraints change after planning; Results, filled only by
+verification.
 
 **plan.md**: Approach (interfaces and pseudo-code, no implementations); Changes mapped to the outcomes
 they serve; Choices that are hard to reverse, with the rejected alternative; Risks; links to any
@@ -60,6 +62,20 @@ shows it was wrong. Tightening it, or correcting a check that tested the wrong t
 spec and needs no approval. Loosening it (dropping it, lowering a threshold, narrowing what the check
 covers) needs the user's confirmation first: otherwise the agent can make the work pass by moving the
 target.
+
+`plan` records a hash of the spec's Outcomes and Constraints (`target_hash`, computed by
+`target-hash.ps1`). Any later edit to them adds a line to the spec's Target changes section and
+re-records the hash; `analyze` and `intent.verify` report a change that no line explains. This detects a
+moved target; it does not prevent one.
+
+Every plan carries a fixed "When to stop and ask" section, which `implement` reads with the plan: the
+spec outranks decision records, which outrank the plan, which outranks the tasks, and the build stops for
+the user only for ambiguity, a conflict between things the user owns, a loosened target, an irreversible
+action, or being stuck. Each answer is written into the files and not asked again.
+
+`intent.verify` is run by the agent that built the work. Adding `independent` to its input
+(`/speckit-intent-verify independent` in Claude Code) also has a fresh, read-only sub-agent try to show
+the work fails. It never runs by default: a second agent costs tokens.
 
 ## Install in a project
 
@@ -321,13 +337,14 @@ install.ps1      installs into the current project, for every integration
 preset/
   preset.yml
   commands/      speckit.{specify,clarify,plan,tasks,analyze,converge,checklist}.md
-  templates/     spec-template.md, plan-template.md, tasks-template.md
+  templates/     spec-template.md, plan-template.md, tasks-template.md, decision-template.md
 extensions/
-  intent/        extension.yml, commands/speckit.intent.verify.md
+  intent/        extension.yml, commands/speckit.intent.verify.md,
+                 scripts/powershell/target-hash.ps1
   companion/     extension.yml, NOTICE, commands/speckit.companion.show.md,
                  scripts/companion/ (vendored server), scripts/powershell/{start,stop}-companion.ps1
   feature-id/    extension.yml, commands/speckit.feature-id.allocate.md,
                  scripts/powershell/{feature-id-lib,new-feature-id,migrate-feature-ids}.ps1
-tests/           Pester tests for feature-id and companion scripts
+tests/           Pester tests for the scripts and for consistency across commands
 docs/decisions/  decision records for this repository
 ```

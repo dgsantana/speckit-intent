@@ -53,7 +53,8 @@ it or change it; do not ask the user to rank a list.
 4. If nothing is missing, leave tasks.md untouched. Otherwise append a `## Convergence` group (numbered
    `## Convergence 2` and so on if one exists) with one task per gap, continuing the T### sequence, in
    the same format: `- [ ] T### [O#] Description with file path`. A missing check comes before the
-   change it holds, except for an `Unchanged:` outcome, whose check holds before and after. Add no
+   change it holds, except for an `Unchanged:` outcome, whose check holds before and after, and a
+   `Never:` outcome whose failure cannot happen yet, whose check comes with the change. Add no
    verification task; verification runs after implementation as a hook.
 
 ## Report

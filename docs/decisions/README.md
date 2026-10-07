@@ -43,3 +43,7 @@ A concrete trigger, not "if needed".
 | [0004 Vendor the Superpowers visual companion](0004-vendor-visual-companion.md) | active |
 | [0005 Decision records stay in this repository](0005-decision-records-not-shipped.md) | superseded by 0006 |
 | [0006 Ship lean decision records in the preset](0006-ship-decision-records.md) | active |
+| [0007 Detect changes to the target with a hash](0007-target-hash.md) | active |
+| [0008 Failure conditions as Never: outcomes](0008-never-outcomes.md) | active |
+| [0009 Independent verification is opt-in](0009-optional-independent-verify.md) | active |
+| [0010 An order of authority and five reasons to stop](0010-when-to-stop-and-ask.md) | active |

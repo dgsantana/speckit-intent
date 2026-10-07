@@ -19,6 +19,7 @@ check that proves it. If an outcome has no check, it is a wish; rewrite it or dr
 |----|---------|-------|
 | O1 | [Observable behaviour, with numbers where they matter] | [Test name, command, or measurement and its pass threshold] |
 | O2 | Unchanged: [existing behaviour that must hold] | [Check that passes before and after the change] |
+| O3 | Never: [an observable way the intent is missed even when the other outcomes look met] | [Check that tries to cause it and passes when it cannot] |
 
 ## Constraints
 
@@ -33,6 +34,9 @@ decision records that bind this work. One line each, with the reason when it is 
 
 ## Edge cases
 
+Notes for the builder. An edge case whose wrong handling would miss the intent is an outcome instead,
+usually a `Never:` one, so that it gets a check.
+
 - [Situation] -> [expected behaviour]
 
 ## Evidence
@@ -46,6 +50,11 @@ What this rests on, each tagged by tier. A claim moves up a tier only by measure
 ## Open questions
 
 [At most three, only where the answer changes an outcome. Remove the section when there are none.]
+
+## Target changes
+
+[Changes to Outcomes or Constraints after planning, one line each: date, item, what changed, tightened
+or loosened, who confirmed a loosening. Empty until then.]
 
 ## Results
 

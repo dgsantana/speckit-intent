@@ -38,6 +38,19 @@ numbered list with the recommendation first. Never print a table of lettered opt
 type a letter back. To settle an order (which tasks or items first), propose one and ask whether to keep
 it or change it; do not ask the user to rank a list.
 
+## Changing the target
+
+Once the spec has a `target_hash` (`plan` records it), its Outcomes and Constraints are the agreed target.
+Any edit to them, tightening or loosening, adds one line to the spec's Target changes section (date, item, what
+changed, tightened or loosened, who confirmed a loosening) and then re-records the hash:
+
+```text
+pwsh -NoProfile -File .specify/extensions/intent/scripts/powershell/target-hash.ps1 -Record
+```
+
+Never re-record without the Target changes line. A recorded hash that no longer matches, with no line explaining
+the difference, is how a silent change to the target is found.
+
 ## Steps
 
 1. Run `{SCRIPT}` from the repository root and parse FEATURE_SPEC and FEATURE_DIR.
@@ -57,6 +70,7 @@ it or change it; do not ask the user to rank a list.
 4. Write each answer where it belongs: in the outcome, check, constraint, edge case or Evidence entry it
    settles, not in a separate clarifications section. Remove the Open question it answers. An answer
    that loosens an outcome or its check is the user's decision by construction, so it may be applied.
+   After planning, record the edit as Changing the target describes.
 
 5. Keep the spec's sections as the template has them; add none.
 
