@@ -211,7 +211,11 @@ The steps below are written to be followed as they stand, by a person or an agen
    themselves. These are meant to be committed so the whole team gets the same commands. Spec Kit may
    suggest adding agent folders to `.gitignore` because they can hold personal settings and credentials:
    commit the command folders, and if personal files such as `.claude/settings.local.json` appear in
-   `git status`, point them out so the user can ignore them. Committing is the user's call. Start a new
+   `git status`, point them out so the user can ignore them. On Windows with `core.autocrlf=true`, files
+   can show as modified while `git diff` is empty: only their line endings differ, and `git add` clears
+   them with nothing to commit. The same effect makes `specify integration upgrade` claim command files
+   were modified since installation, and it exits 0 without upgrading; check `git diff` before using
+   `--force`. Committing is the user's call. Start a new
    agent session if the new commands do not appear.
 
 ### How the installer works
