@@ -294,7 +294,9 @@ way.
    ("spec 021", "specification 021"), a number two directories share, and a path into another tree
    (`../other/specs/021`) are listed under UNRESOLVED for a person to fix. If the repository's documents
    cite another repository's specs by number, pass `-Foreign '<pattern>'` (for example `'ACME|AcmeCorp/'`)
-   so short references on lines naming it are listed instead of rewritten: the number may be theirs. Changelogs and `history/` folders are left alone (`-Keep` changes the patterns), because
+   so a short reference written right after it (as in `` `AcmeCorp/acme` `specs/001` ``) is listed instead of
+   rewritten: the number may be theirs. Elsewhere on the same line, references are still rewritten.
+   Installed tool files under `.specify/extensions/` and `.specify/presets/` are never rewritten. Changelogs and `history/` folders are left alone (`-Keep` changes the patterns), because
    they describe what happened under the old names.
 3. **Apply and commit** the renames, the rewritten references and `.specify/feature-id-migration.json`
    together, as one commit that does nothing else:

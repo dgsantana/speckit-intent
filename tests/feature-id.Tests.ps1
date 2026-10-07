@@ -146,7 +146,11 @@ Describe 'migration' {
             'Prose: spec 021 shipped, as specification 021 says.'
             'Elsewhere: ../acme/specs/021 belongs to another repository.'
             'Foreign: ACME specs/021 is theirs.'
+            'Same line, not adjacent: the ACME world data bundle is described in specs/021.'
         )
+        $tool = Join-Path $root '.specify/extensions/feature-id/scripts/powershell'
+        New-Item -ItemType Directory -Path $tool -Force | Out-Null
+        Set-Content -LiteralPath (Join-Path $tool 'example.ps1') -Value '# `specs/021` means 021-launcher-page.'
         git -C $root add -A
         git -C $root commit -q -m 'specs' --date '2026-09-01T12:00:00'
 
@@ -162,6 +166,8 @@ Describe 'migration' {
         $lines[3] | Should -Be 'Prose: spec 021 shipped, as specification 021 says.'
         $lines[4] | Should -Be 'Elsewhere: ../acme/specs/021 belongs to another repository.'
         $lines[5] | Should -Be 'Foreign: ACME specs/021 is theirs.'
+        $lines[6] | Should -Be "Same line, not adjacent: the ACME world data bundle is described in specs/$launcher."
+        Get-Content -LiteralPath (Join-Path $tool 'example.ps1') | Should -Be '# `specs/021` means 021-launcher-page.'
 
         $unresolved = ($result.Output | ConvertFrom-Json).UNRESOLVED
         ($unresolved | Where-Object { $_.FILE -eq 'notes.md' }).LINE | Sort-Object | Should -Be @(3, 4, 5, 6)

@@ -200,7 +200,11 @@ try {
     }
 
     # The mapping records the rename; rewriting it would turn each key into its own target.
-    $candidates = @(git ls-files | Where-Object { $_ -and $_ -ne $mappingRelative })
+    # Installed preset and extension files belong to the tools (this script among them) and are rewritten
+    # by the next install; their examples must not be migrated.
+    $candidates = @(git ls-files | Where-Object {
+            $_ -and $_ -ne $mappingRelative -and $_ -notlike '.specify/extensions/*' -and $_ -notlike '.specify/presets/*'
+        })
     if (-not ($candidates -contains '.specify/feature.json')) { $candidates += '.specify/feature.json' }
 
     # Whole directory-name tokens only: `007-auth` must not match inside `007-auth-tokens`.
@@ -229,6 +233,7 @@ try {
         [regex]::new("(?i)(?<![A-Za-z0-9_-])spec(?:ification)?s?[\\/ ]+(?:$(($byNumber.Keys | Sort-Object) -join '|'))(?![0-9A-Za-z_-])")
     } else { $null }
     $foreignPattern = if ($Foreign) { [regex]::new($Foreign) } else { $null }
+    $foreignWindow = 24
 
     $strictUtf8 = [Text.UTF8Encoding]::new($false, $true)
     $edits = @()
@@ -267,14 +272,30 @@ try {
             $shortHits = @{}
             $lines = $updated -split "`n"
             for ($i = 0; $i -lt $lines.Count; $i++) {
-                if ($foreignPattern -and $foreignPattern.IsMatch($lines[$i])) { continue }
                 foreach ($number in $shortPatterns.Keys) {
                     $short = $shortPatterns[$number]
-                    $count = $short.Pattern.Matches($lines[$i]).Count
-                    if ($count -gt 0) {
-                        $lines[$i] = $short.Pattern.Replace($lines[$i], $short.NewName)
-                        $shortHits[$number] += $count
+                    $line = $lines[$i]
+                    $found = $short.Pattern.Matches($line)
+                    if ($found.Count -eq 0) { continue }
+                    $builder = [Text.StringBuilder]::new()
+                    $last = 0
+                    foreach ($m in $found) {
+                        # A reference is another repository's only when -Foreign matches just before its
+                        # `specs/` prefix, as in "`AcmeCorp/acme` `specs/001`"; elsewhere on the line it is ours.
+                        $prefix = $m.Index - 'specs/'.Length
+                        $windowStart = [Math]::Max(0, $prefix - $foreignWindow)
+                        $isForeign = $foreignPattern -and $foreignPattern.IsMatch($line.Substring($windowStart, $prefix - $windowStart))
+                        [void]$builder.Append($line, $last, $m.Index - $last)
+                        if ($isForeign) {
+                            [void]$builder.Append($m.Value)
+                        } else {
+                            [void]$builder.Append($short.NewName)
+                            $shortHits[$number] += 1
+                        }
+                        $last = $m.Index + $m.Length
                     }
+                    [void]$builder.Append($line, $last, $line.Length - $last)
+                    $lines[$i] = $builder.ToString()
                 }
             }
             $updated = $lines -join "`n"
