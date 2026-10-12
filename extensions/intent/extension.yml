@@ -22,6 +22,10 @@ provides:
       file: scripts/powershell/target-hash.ps1
       description: "Record or check the hash of a spec's Outcomes and Constraints"
       runtimes: [powershell]
+    - name: target-hash-sh
+      file: scripts/bash/target-hash.sh
+      description: "Record or check the hash of a spec's Outcomes and Constraints (bash)"
+      runtimes: [bash]
 
 hooks:
   after_implement:

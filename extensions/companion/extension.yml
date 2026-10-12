@@ -26,6 +26,14 @@ provides:
       file: scripts/powershell/stop-companion.ps1
       description: "Stop a companion session"
       runtimes: [powershell]
+    - name: start-companion-sh
+      file: scripts/bash/start-companion.sh
+      description: "Start the companion server for this project (bash)"
+      runtimes: [bash]
+    - name: stop-companion-sh
+      file: scripts/bash/stop-companion.sh
+      description: "Stop a companion session (bash)"
+      runtimes: [bash]
 
 tags:
   - "design"

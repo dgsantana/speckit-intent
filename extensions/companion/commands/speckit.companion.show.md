@@ -8,6 +8,11 @@ description: Show a visual question in the browser companion and record the choi
 $ARGUMENTS
 ```
 
+## Scripts
+
+Extension scripts below come in two runtimes: the `sh` form when `.specify/init-options.json` has
+`"script": "sh"` (or, without that file, on Linux and macOS), the `ps` form when it has `"script": "ps"`.
+
 ## When
 
 Use the browser only when the user would understand the question better by seeing it than by reading
@@ -36,7 +41,8 @@ Any edit to them, tightening or loosening, adds one line to the spec's Target ch
 changed, tightened or loosened, who confirmed a loosening) and then re-records the hash:
 
 ```text
-pwsh -NoProfile -File .specify/extensions/intent/scripts/powershell/target-hash.ps1 -Record
+sh: .specify/extensions/intent/scripts/bash/target-hash.sh --record
+ps: pwsh -NoProfile -File .specify/extensions/intent/scripts/powershell/target-hash.ps1 -Record
 ```
 
 Never re-record without the Target changes line. A recorded hash that no longer matches, with no line explaining
@@ -48,7 +54,8 @@ changes section; edit it directly, and a loosening still needs the user's confir
 From the project root, with the platform's background mechanism if it reaps detached processes:
 
 ```text
-pwsh -NoProfile -File .specify/extensions/companion/scripts/powershell/start-companion.ps1 -Open
+sh: .specify/extensions/companion/scripts/bash/start-companion.sh --open
+ps: pwsh -NoProfile -File .specify/extensions/companion/scripts/powershell/start-companion.ps1 -Open
 ```
 
 It prints JSON with `url`, `screen_dir` and `state_dir`. Give the user the whole `url`, key included; the
@@ -93,7 +100,8 @@ Screens that settled nothing are not copied.
 When the visual questions are done:
 
 ```text
-pwsh -NoProfile -File .specify/extensions/companion/scripts/powershell/stop-companion.ps1 -SessionDir <parent of state_dir>
+sh: .specify/extensions/companion/scripts/bash/stop-companion.sh <parent of state_dir>
+ps: pwsh -NoProfile -File .specify/extensions/companion/scripts/powershell/stop-companion.ps1 -SessionDir <parent of state_dir>
 ```
 
 The server also stops after four hours idle.

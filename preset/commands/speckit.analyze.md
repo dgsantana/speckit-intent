@@ -12,6 +12,11 @@ scripts:
 $ARGUMENTS
 ```
 
+## Scripts
+
+Extension scripts below come in two runtimes: the `sh` form when `.specify/init-options.json` has
+`"script": "sh"` (or, without that file, on Linux and macOS), the `ps` form when it has `"script": "ps"`.
+
 ## Hooks
 
 Before starting, read `.specify/extensions.yml` if it exists and run each enabled hook under
@@ -33,7 +38,7 @@ nothing. A finding is concrete: the line, what it says, what contradicts it.
 
 2. Check, and record each failure with its location:
    - **Target** (`normal` specs only): run
-     `pwsh -NoProfile -File .specify/extensions/intent/scripts/powershell/target-hash.ps1 -Check`.
+     `.specify/extensions/intent/scripts/bash/target-hash.sh --check` (sh) or `pwsh -NoProfile -File .specify/extensions/intent/scripts/powershell/target-hash.ps1 -Check` (ps).
      `changed` with a difference that no line in the spec's Target changes section explains is a high
      finding (find the edits with `git log -p -- <spec>` and
      `git diff -- <spec>`); `unrecorded` after planning is a medium one.

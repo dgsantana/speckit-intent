@@ -16,6 +16,11 @@ scripts:
 $ARGUMENTS
 ```
 
+## Scripts
+
+Extension scripts below come in two runtimes: the `sh` form when `.specify/init-options.json` has
+`"script": "sh"` (or, without that file, on Linux and macOS), the `ps` form when it has `"script": "ps"`.
+
 ## Hooks
 
 Before starting, read `.specify/extensions.yml` if it exists and run each enabled hook under
@@ -47,7 +52,8 @@ Any edit to them, tightening or loosening, adds one line to the spec's Target ch
 changed, tightened or loosened, who confirmed a loosening) and then re-records the hash:
 
 ```text
-pwsh -NoProfile -File .specify/extensions/intent/scripts/powershell/target-hash.ps1 -Record
+sh: .specify/extensions/intent/scripts/bash/target-hash.sh --record
+ps: pwsh -NoProfile -File .specify/extensions/intent/scripts/powershell/target-hash.ps1 -Record
 ```
 
 Never re-record without the Target changes line. A recorded hash that no longer matches, with no line explaining

@@ -69,7 +69,7 @@ spec and needs no approval. Loosening it (dropping an outcome or lowering a thre
 confirmation first: otherwise the agent can make the work pass by moving the target.
 
 For a normal change, `plan` records a hash of the spec's Outcomes and Constraints (`target_hash`,
-computed by `target-hash.ps1`). Any later edit to them adds a line to the spec's Target changes section
+computed by the `target-hash` script). Any later edit to them adds a line to the spec's Target changes section
 and re-records the hash; `analyze` and `intent.verify` report a change that no line explains, and carry
 on. This detects a moved target; it does not prevent one, and it never stops the work.
 
@@ -103,8 +103,8 @@ Install speckit-intent in this project. Clone it with
 
 The steps below are written to be followed as they stand, by a person or an agent:
 
-- Run every command from the project root. Step 1 works in any shell; from step 2 on, run commands in
-  PowerShell 7 (`pwsh`), whose syntax they use.
+- Run every command from the project root. On Windows run them in PowerShell 7 (`pwsh`); on Linux and
+  macOS in bash. Where a step shows a `powershell` and a `bash` block, run the one for that shell.
 - Where a step says to ask the user, ask with the agent's question tool if it has one, recommendation
   first. If the user cannot be asked, take the default the step names and say so in the report.
 - Commit nothing; the user decides that after step 9.
@@ -114,11 +114,12 @@ The steps below are written to be followed as they stand, by a person or an agen
    | Command | Needs | If missing or older |
    |---|---|---|
    | `git --version` | any | install Git |
-   | `pwsh --version` | 7.2 | install PowerShell 7: <https://learn.microsoft.com/powershell/scripting/install/installing-powershell> |
+   | `pwsh --version` | 7.2 | Windows only: install PowerShell 7: <https://learn.microsoft.com/powershell/scripting/install/installing-powershell> |
+   | `perl -v` | 5.10 | Linux and macOS only; it ships with Git and with the system |
    | `specify --version` | 1.1.1 | `uv tool install specify-cli`, or `uv tool upgrade specify-cli`; without `uv`, install it first: <https://docs.astral.sh/uv/getting-started/installation/> |
    | `node --version` | 18 | needed only for the visual companion; see step 4 |
 
-   If Git, PowerShell or Spec Kit is missing or too old, stop and tell the user what to install. Do not
+   If Git, PowerShell (Windows), Perl (Linux, macOS) or Spec Kit is missing or too old, stop and tell the user what to install. Do not
    install system software without asking.
 
 2. **Set up Spec Kit, if it is not set up.** If `.specify/integration.json` exists, go to step 3.
@@ -132,6 +133,14 @@ The steps below are written to be followed as they stand, by a person or an agen
    specify init --here --force --non-interactive --integration <first> --script ps
    specify integration install <each further one>
    ```
+
+   ```bash
+   specify init --here --force --non-interactive --integration <first> --script sh
+   specify integration install <each further one>
+   ```
+
+   The script type decides which form of the extension scripts the commands run: `ps` the PowerShell
+   ones, `sh` the bash ones. A team on both picks one; `pwsh` runs on Linux and macOS too.
 
    `--here` in a folder that has files needs `--force`, and without `--non-interactive` the command
    cancels itself when no one answers its prompt and still exits 0. `--force` writes Spec Kit's files
@@ -151,7 +160,7 @@ The steps below are written to be followed as they stand, by a person or an agen
 
 3. **Get the clone.** If `$HOME/.speckit-intent` does not exist, clone it; if it does, update it:
 
-   ```powershell
+   ```text
    git clone https://github.com/dgsantana/speckit-intent.git "$HOME/.speckit-intent"
    git -C "$HOME/.speckit-intent" pull --ff-only
    ```
@@ -160,11 +169,11 @@ The steps below are written to be followed as they stand, by a person or an agen
 
 4. **Choose the extensions.** Ask the user the questions that apply:
    - Dated feature IDs (`feature-id`)? Recommended when more than one person or agent opens specs on
-     separate branches; for a single author, leave it out with `-NoFeatureId`. Count the authors with
+     separate branches; for a single author, leave it out with `-NoFeatureId` (`--no-feature-id` in bash). Count the authors with
      `git shortlog -sn --all`: recommend it for more than one, and recommend leaving it out for one. If
      the user cannot be asked, follow that recommendation.
    - Visual companion (`companion`)? Shows layouts and diagrams in a browser tab while specifying;
-     needs Node.js 18. Leave it out with `-NoCompanion`. Default: install it if step 1 found Node.js 18
+     needs Node.js 18. Leave it out with `-NoCompanion` (`--no-companion` in bash). Default: install it if step 1 found Node.js 18
      or later. If Node.js is missing or older, do not ask: leave it out and tell the user why.
 
 5. **Run the installer once**, adding each switch chosen in step 4. The two switches are independent;
@@ -173,6 +182,10 @@ The steps below are written to be followed as they stand, by a person or an agen
 
    ```powershell
    pwsh -NoProfile -File "$HOME/.speckit-intent/install.ps1" [-NoFeatureId] [-NoCompanion]
+   ```
+
+   ```bash
+   "$HOME/.speckit-intent/install.sh" [--no-feature-id] [--no-companion]
    ```
 
    Read the result from its last line and its exit code:
@@ -199,6 +212,10 @@ The steps below are written to be followed as they stand, by a person or an agen
 
    ```powershell
    pwsh -NoProfile -File .specify/extensions/feature-id/scripts/powershell/new-feature-id.ps1 -Verify
+   ```
+
+   ```bash
+   .specify/extensions/feature-id/scripts/bash/new-feature-id.sh --verify
    ```
 
    It prints JSON. `FAILURES` empty and exit code 0 means every directory is fine; each entry in
@@ -273,7 +290,12 @@ nothing extra. Directly:
 ```text
 pwsh -NoProfile -File .specify/extensions/feature-id/scripts/powershell/new-feature-id.ps1 -Name "<feature name>"
 pwsh -NoProfile -File .specify/extensions/feature-id/scripts/powershell/new-feature-id.ps1 -Verify
+.specify/extensions/feature-id/scripts/bash/new-feature-id.sh --name "<feature name>"
+.specify/extensions/feature-id/scripts/bash/new-feature-id.sh --verify
 ```
+
+The bash scripts take the same options in `--kebab-case` (`-Apply` is `--apply`, `-AllowDirty` is
+`--allow-dirty`) and print the same JSON.
 
 ### Moving an ongoing project from NNN- numbering
 
@@ -291,6 +313,7 @@ way.
 2. **Dry run**, and read the list of renames and of files whose references will be rewritten:
    ```text
    pwsh -NoProfile -File .specify/extensions/feature-id/scripts/powershell/migrate-feature-ids.ps1
+   .specify/extensions/feature-id/scripts/bash/migrate-feature-ids.sh
    ```
    Dates come from the oldest commit on any branch that added each `spec.md`, so every branch derives the
    same names. Changelogs and `history/` folders are left alone (`-Keep` changes the patterns), because
@@ -312,6 +335,8 @@ way.
    ```text
    pwsh -NoProfile -File .specify/extensions/feature-id/scripts/powershell/migrate-feature-ids.ps1 -Apply
    pwsh -NoProfile -File .specify/extensions/feature-id/scripts/powershell/new-feature-id.ps1 -Verify
+   .specify/extensions/feature-id/scripts/bash/migrate-feature-ids.sh --apply
+   .specify/extensions/feature-id/scripts/bash/new-feature-id.sh --verify
    ```
 4. **Bring open feature branches across.** Either merge or rebase the integration branch into them (git
    follows the renames), or run the same migration on the branch after the mapping file has reached it.
@@ -347,7 +372,7 @@ When a question during `specify`, `clarify` or `plan` is clearer shown than desc
 diagram, visual options side by side), the agent offers a browser tab once, then writes screens to it and
 reads the user's clicks back. The server is Superpowers' visual companion (MIT, see
 `extensions/companion/NOTICE`), changed to make no request outside the local server and started by a
-PowerShell launcher. What it adds over the original is the trail: a choice the browser settles is written
+PowerShell or bash launcher. What it adds over the original is the trail: a choice the browser settles is written
 into the spec or the plan's Choices, with the options not taken as rejected alternatives, and the deciding
 screen is copied to `<feature>/design/`. Session files under `.specify/companion/` stay out of git.
 
@@ -360,6 +385,15 @@ pwsh -NoProfile -Command "Invoke-Pester -Path tests"
 Requires Pester 5.5 or later (`Install-Module Pester -Scope CurrentUser`) and Node.js for the companion
 tests.
 
+The bash ports are held to the PowerShell scripts by a parity suite, which runs both on identical
+throwaway projects (PowerShell in a container) and compares their JSON, exit codes and rewritten files:
+
+```text
+tests/parity/parity.sh
+```
+
+It needs bash, perl, git, jq and podman.
+
 ## Decisions
 
 Choices about this repository, with what each protects and the alternatives rejected, are in
@@ -369,17 +403,20 @@ Choices about this repository, with what each protects and the alternatives reje
 
 ```text
 install.ps1      installs into the current project, for every integration
+install.sh       the same, in bash
 preset/
   preset.yml
   commands/      speckit.{specify,clarify,plan,tasks,analyze,converge,checklist}.md
   templates/     spec-template.md, plan-template.md, tasks-template.md, decision-template.md
 extensions/
   intent/        extension.yml, commands/speckit.intent.verify.md,
-                 scripts/powershell/target-hash.ps1
+                 scripts/{powershell,bash}/target-hash.{ps1,sh}
   companion/     extension.yml, NOTICE, commands/speckit.companion.show.md,
-                 scripts/companion/ (vendored server), scripts/powershell/{start,stop}-companion.ps1
+                 scripts/companion/ (vendored server), scripts/{powershell,bash}/{start,stop}-companion.{ps1,sh}
   feature-id/    extension.yml, commands/speckit.feature-id.allocate.md,
-                 scripts/powershell/{feature-id-lib,new-feature-id,migrate-feature-ids}.ps1
-tests/           Pester tests for the scripts and for consistency across commands
+                 scripts/powershell/{feature-id-lib,new-feature-id,migrate-feature-ids}.ps1,
+                 scripts/bash/{FeatureIdLib.pm,new-feature-id.sh,migrate-feature-ids.sh}
+tests/           Pester tests for the scripts and for consistency across commands;
+                 parity/ holds the bash-versus-PowerShell suite
 docs/decisions/  decision records for this repository
 ```

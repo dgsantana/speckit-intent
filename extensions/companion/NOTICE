@@ -29,5 +29,6 @@ Changes from upstream:
   primeradiant.com with the Superpowers version in the query string unless a telemetry opt-out
   variable is set; this copy makes no request outside the local server.
 
-The bash launchers are replaced by scripts/powershell/start-companion.ps1 and stop-companion.ps1.
+The upstream bash launchers are replaced by scripts/powershell/{start,stop}-companion.ps1 and by
+scripts/bash/{start,stop}-companion.sh, which share their session layout.
 When updating from upstream, diff the three files against the new release and reapply the change above.

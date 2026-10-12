@@ -30,6 +30,18 @@ provides:
       file: scripts/powershell/feature-id-lib.ps1
       description: "Shared slug and hash rules"
       runtimes: [powershell]
+    - name: new-feature-id-sh
+      file: scripts/bash/new-feature-id.sh
+      description: "Allocate or audit a feature ID (bash)"
+      runtimes: [bash]
+    - name: migrate-feature-ids-sh
+      file: scripts/bash/migrate-feature-ids.sh
+      description: "Rename legacy NNN- spec directories to dated IDs and rewrite references (bash)"
+      runtimes: [bash]
+    - name: feature-id-lib-sh
+      file: scripts/bash/FeatureIdLib.pm
+      description: "Shared slug and hash rules (perl, used by the bash scripts)"
+      runtimes: [bash]
 
 hooks:
   before_specify:

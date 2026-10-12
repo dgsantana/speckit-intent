@@ -12,6 +12,11 @@ The input may name a feature directory or particular outcomes; otherwise verify 
 feature in `.specify/feature.json`. The word `independent` in the input asks for the independent check
 in step 4; without it, that step is skipped.
 
+## Scripts
+
+Extension scripts below come in two runtimes: the `sh` form when `.specify/init-options.json` has
+`"script": "sh"` (or, without that file, on Linux and macOS), the `ps` form when it has `"script": "ps"`.
+
 ## Principle
 
 A result is what was observed, not what was intended. Report a failure as plainly as a pass; a partial
@@ -35,7 +40,8 @@ Any edit to them, tightening or loosening, adds one line to the spec's Target ch
 changed, tightened or loosened, who confirmed a loosening) and then re-records the hash:
 
 ```text
-pwsh -NoProfile -File .specify/extensions/intent/scripts/powershell/target-hash.ps1 -Record
+sh: .specify/extensions/intent/scripts/bash/target-hash.sh --record
+ps: pwsh -NoProfile -File .specify/extensions/intent/scripts/powershell/target-hash.ps1 -Record
 ```
 
 Never re-record without the Target changes line. A recorded hash that no longer matches, with no line explaining
@@ -46,7 +52,7 @@ changes section; edit it directly, and a loosening still needs the user's confir
 
 1. Read `.specify/feature.json` for the feature directory, then its `spec.md` and `tasks.md`. For a
    `normal` spec, run
-   `pwsh -NoProfile -File .specify/extensions/intent/scripts/powershell/target-hash.ps1 -Check`.
+   `.specify/extensions/intent/scripts/bash/target-hash.sh --check` (sh) or `pwsh -NoProfile -File .specify/extensions/intent/scripts/powershell/target-hash.ps1 -Check` (ps).
    `changed` with no Target changes line for an edit: note it at the top of Results ("target changed
    after planning without a Target changes line", with what `git log -p -- <spec>` or `git diff -- <spec>`
    shows) and go on. `unrecorded`: note it for the report and go on.

@@ -8,6 +8,11 @@ description: Allocate the feature directory ID for a new spec, or audit specs/ f
 $ARGUMENTS
 ```
 
+## Scripts
+
+Extension scripts below come in two runtimes: the `sh` form when `.specify/init-options.json` has
+`"script": "sh"` (or, without that file, on Linux and macOS), the `ps` form when it has `"script": "ps"`.
+
 ## What this does
 
 Allocates the directory a new specification lives in, and nothing else: no spec content, no branch, no
@@ -25,7 +30,8 @@ When run as the `before_specify` hook, the input is the feature description: der
 to four words from it first. Then run from the project root:
 
 ```text
-pwsh -NoProfile -File .specify/extensions/feature-id/scripts/powershell/new-feature-id.ps1 -Name "<short name>"
+sh: .specify/extensions/feature-id/scripts/bash/new-feature-id.sh --name "<short name>"
+ps: pwsh -NoProfile -File .specify/extensions/feature-id/scripts/powershell/new-feature-id.ps1 -Name "<short name>"
 ```
 
 It prints JSON with `FEATURE_ID`, `SLUG`, `HASH`, `DATE`, `FEATURE_DIRECTORY` and `EXISTING`.
@@ -38,7 +44,7 @@ It prints JSON with `FEATURE_ID`, `SLUG`, `HASH`, `DATE`, `FEATURE_DIRECTORY` an
 
 ## Audit
 
-If the input is `--verify`, run the same script with `-Verify`. It recomputes every dated ID's hash from
+If the input is `--verify`, run the same script with `--verify` (sh) or `-Verify` (ps). It recomputes every dated ID's hash from
 its own slug; a non-zero exit lists directories that were hand-edited or renamed without re-deriving
 their hash, and directories that share a slug (two branches that started the same feature). Legacy
 `NNN-` directories are reported as legacy, not failures.

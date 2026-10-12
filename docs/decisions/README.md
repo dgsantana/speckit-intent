@@ -54,3 +54,4 @@ A concrete trigger, not "if needed".
 | [0014 What a hand-written small-work record taught the preset](0014-lessons-from-small-work-records.md) | amended by 0016 |
 | [0015 Verify catches regressions and keeps the history](0015-verify-regressions-and-history.md) | amended by 0016 |
 | [0016 Field-report rules after 0015, and a trim](0016-field-rules-and-trim.md) | active |
+| [0017 Linux and macOS without PowerShell](0017-linux-support.md) | active |
