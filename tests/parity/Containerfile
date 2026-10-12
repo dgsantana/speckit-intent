@@ -1,0 +1,5 @@
+# PowerShell 7 with git, for running the PowerShell scripts beside their bash ports (parity.sh).
+FROM mcr.microsoft.com/powershell:latest
+RUN apt-get update && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/* \
+    && git config --system user.name parity && git config --system user.email parity@example.invalid \
+    && git config --system --add safe.directory "*"

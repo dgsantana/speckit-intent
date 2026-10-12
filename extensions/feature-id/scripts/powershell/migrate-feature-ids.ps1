@@ -202,7 +202,8 @@ try {
     # The mapping records the rename; rewriting it would turn each key into its own target.
     # Installed preset and extension files belong to the tools (this script among them) and are rewritten
     # by the next install; their examples must not be migrated.
-    $candidates = @(git ls-files | Where-Object {
+    # core.quotePath off: git would otherwise print a non-ASCII path quoted and escaped, and the file be skipped.
+    $candidates = @(git -c core.quotePath=false ls-files | Where-Object {
             $_ -and $_ -ne $mappingRelative -and $_ -notlike '.specify/extensions/*' -and $_ -notlike '.specify/presets/*'
         })
     if (-not ($candidates -contains '.specify/feature.json')) { $candidates += '.specify/feature.json' }
