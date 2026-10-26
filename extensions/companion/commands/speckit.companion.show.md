@@ -69,14 +69,23 @@ tab reconnects on the same port, and every later step uses the new `screen_dir` 
    (`layout.html`, `layout-v2.html`); never reuse a name. Write a fragment, not a full document: the server
    wraps it in a frame whose classes (`options`/`option`, `cards`/`card`, `mockup`, `split`, `pros-cons`,
    `mock-*`) are defined in
-   `.specify/extensions/companion/scripts/companion/frame-template.html`. Clickable options carry
-   `data-choice="<id>"` and `onclick="toggleSelect(this)"`; add `data-multiselect` to the container to allow
-   several. State the question on the screen, two to four options, real content where it matters.
-2. Tell the user, in the terminal, what the screen shows and that they can click and then reply there.
-   End the turn.
-3. On the next turn, read `<state_dir>/events` if it exists: one JSON line per click, last choice usually
-   final. The user's terminal reply wins over the clicks where they differ.
-4. Iterate with a new file, or move on. When the conversation returns to text, write a short
+   `.specify/extensions/companion/scripts/companion/frame-template.html`. State the question on the screen,
+   two to four options, real content where it matters.
+2. Make each option a working prototype, not a picture: what the question is about responds as the real
+   thing would (select a row, fold a group, switch a tab, type in a field), so the user judges the design by
+   using it. Script it with an inline `<script>` in the fragment: no library, file or request from outside
+   it, each option's state kept apart, and the frame's functions (`toggleSelect`) called only from event
+   handlers, since the frame's script loads after the fragment. A screen stays static only where nothing on
+   it would respond in the product (a diagram, a flow).
+3. Choosing is separate from trying: the frame records any click inside an element with `data-choice` as a
+   choice. Give each option a Choose button carrying `data-choice="<id>"` and
+   `onclick="toggleSelect(this.closest('.option, .card'))"`, never `data-choice` on the whole option; add
+   `data-multiselect` to the container to allow several.
+4. Tell the user, in the terminal, what the screen shows, that the options can be tried, and that Choose
+   picks one; then they reply there. End the turn.
+5. On the next turn, read `<state_dir>/events` if it exists: one JSON line per Choose click, last choice
+   usually final. The user's terminal reply wins over the clicks where they differ.
+6. Iterate with a new file, or move on. When the conversation returns to text, write a short
    `waiting.html` ("Continuing in the terminal") so the tab does not show a settled question.
 
 ## Record what it settled

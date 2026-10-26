@@ -370,7 +370,8 @@ evidence or meets its trigger.
 
 When a question during `specify`, `clarify` or `plan` is clearer shown than described (a layout, a
 diagram, visual options side by side), the agent offers a browser tab once, then writes screens to it and
-reads the user's clicks back. The server is Superpowers' visual companion (MIT, see
+reads the user's clicks back. Each option on a screen is a working prototype the user can try (select a row,
+fold a group, type in a field) before choosing it with its own Choose control. The server is Superpowers' visual companion (MIT, see
 `extensions/companion/NOTICE`), changed to make no request outside the local server and started by a
 PowerShell or bash launcher. What it adds over the original is the trail: a choice the browser settles is written
 into the spec or the plan's Choices, with the options not taken as rejected alternatives, and the deciding
