@@ -50,7 +50,9 @@ they serve; Choices that are hard to reverse, with the rejected alternative; Ris
 supporting document and why it exists.
 
 **tasks.md**: `- [ ] T### [P?] [O#,...] Description with file path`, grouped so each group reaches an
-outcome end to end, tests before the change they hold. Verification is not a task: the intent
+outcome end to end. An automated check counts once it has been seen to fail on its own assertion (not a
+compile error) with the behaviour its outcome names absent or broken, and the task records how.
+Verification is not a task: the intent
 extension runs it after `implement`.
 
 **Results** (written by `speckit.intent.verify`): per outcome Pass, Fail, Partial or Not run, with the

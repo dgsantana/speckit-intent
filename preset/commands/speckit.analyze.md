@@ -44,12 +44,14 @@ nothing. A finding is concrete: the line, what it says, what contradicts it.
      `git diff -- <spec>`); `unrecorded` after planning is a medium one.
    - **Coverage**: every outcome is served by a plan Change and by at least one task; every Change and task
      names an outcome that exists.
-   - **Checks**: every outcome has a check with a pass threshold, and tasks order automated checks by
-     this rule.
-     Red-first: an outcome's check is written before the change and fails without it. An `Unchanged:`
-     check passes before and after the change. A `Never:` check fails before the change when the failure
-     happens today (a bug); when it cannot happen yet, it comes with the change and must exercise the path
-     where the failure would occur.
+   - **Checks**: every outcome has a check with a pass threshold, and each ticked task that adds an
+     automated check says how it was seen failing, by this rule.
+     Seen failing: an automated check this work adds counts once it has been seen to fail on its own
+     assertion, not on a compile error or a failure elsewhere, with the behaviour its outcome names
+     absent or broken: run before the change, or run with that behaviour reverted or broken. For a
+     `Never:` check, that behaviour is the code that prevents the failure. An `Unchanged:` check also
+     passes before and after the change. A check that only shows something exists (a file written, a
+     value constructed, a call returning success) does not count.
    - **Format**: every task line is `- [ ] T### [P?] [O#,...] Description with file path`, numbered in
      order.
    - **Consistency**: no constraint is broken by a plan Change; no plan Choice contradicts the spec or a

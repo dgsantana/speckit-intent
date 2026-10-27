@@ -11,9 +11,9 @@ BeforeDiscovery {
     # Commands that may edit a spec's Outcomes or Constraints after planning.
     $editing = @('speckit.clarify', 'speckit.plan', 'speckit.tasks', 'speckit.intent.verify', 'speckit.companion.show')
     $targetEditors = @($commands | Where-Object { $_.Name -in $editing })
-    # Commands that order tasks or judge checks, and so state the red-first rule.
+    # Commands that order tasks or judge checks, and so state the seen-failing rule.
     $ordering = @('speckit.tasks', 'speckit.analyze', 'speckit.converge', 'speckit.intent.verify')
-    $redFirst = @($commands | Where-Object { $_.Name -in $ordering })
+    $seenFailing = @($commands | Where-Object { $_.Name -in $ordering })
 }
 
 BeforeAll {
@@ -51,13 +51,13 @@ Describe 'changing the target' {
     }
 }
 
-Describe 'red-first' {
-    It '<Name> states the red-first rule in the same words as the others' -ForEach $redFirst {
+Describe 'seen failing' {
+    It '<Name> states the seen-failing rule in the same words as the others' -ForEach $seenFailing {
         $text = (Get-Content -LiteralPath $Path -Raw) -replace '\s+', ' '
-        $match = [regex]::Match($text, 'Red-first: .*?would occur\.')
+        $match = [regex]::Match($text, 'Seen failing: .*?does not count\.')
         $match.Success | Should -BeTrue
         $tasks = (Get-Content -LiteralPath (Join-Path $repo 'preset/commands/speckit.tasks.md') -Raw) -replace '\s+', ' '
-        $match.Value | Should -BeExactly ([regex]::Match($tasks, 'Red-first: .*?would occur\.').Value)
+        $match.Value | Should -BeExactly ([regex]::Match($tasks, 'Seen failing: .*?does not count\.').Value)
     }
 }
 

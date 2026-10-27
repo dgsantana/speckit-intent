@@ -45,7 +45,7 @@ A concrete trigger, not "if needed".
 | [0005 Decision records stay in this repository](0005-decision-records-not-shipped.md) | superseded by 0006 |
 | [0006 Ship lean decision records in the preset](0006-ship-decision-records.md) | amended by 0012 |
 | [0007 Detect changes to the target with a hash](0007-target-hash.md) | amended by 0012, 0015 |
-| [0008 Failure conditions as Never: outcomes](0008-never-outcomes.md) | active |
+| [0008 Failure conditions as Never: outcomes](0008-never-outcomes.md) | amended by 0018 |
 | [0009 Independent verification is opt-in](0009-optional-independent-verify.md) | active |
 | [0010 An order of authority and five reasons to stop](0010-when-to-stop-and-ask.md) | amended by 0012, 0013 |
 | [0011 Two sizes: small and normal](0011-two-sizes.md) | active |
@@ -55,3 +55,4 @@ A concrete trigger, not "if needed".
 | [0015 Verify catches regressions and keeps the history](0015-verify-regressions-and-history.md) | amended by 0016 |
 | [0016 Field-report rules after 0015, and a trim](0016-field-rules-and-trim.md) | active |
 | [0017 Linux and macOS without PowerShell](0017-linux-support.md) | active |
+| [0018 A check counts once it has been seen failing](0018-seen-failing.md) | active |

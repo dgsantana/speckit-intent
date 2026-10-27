@@ -67,13 +67,13 @@ changes section; edit it directly, and a loosening still needs the user's confir
    - Every task line is `- [ ] T### [P?] [O#,...] Description with file path`, numbered in execution
      order. Other tools parse this format; keep it exact.
    - Group tasks so each group reaches an outcome end to end, the most valuable first. No empty phases.
-   - Where an outcome has an automated check, order its task by this rule.
-     Red-first: an outcome's check is written before the change and fails without it. An `Unchanged:`
-     check passes before and after the change. A `Never:` check fails before the change when the failure
-     happens today (a bug); when it cannot happen yet, it comes with the change and must exercise the path
-     where the failure would occur.
-     A test that only shows something exists (a file written, a value constructed, a call returning
-     success) does not count as a check.
+   - Where an outcome has an automated check, its task follows this rule.
+     Seen failing: an automated check this work adds counts once it has been seen to fail on its own
+     assertion, not on a compile error or a failure elsewhere, with the behaviour its outcome names
+     absent or broken: run before the change, or run with that behaviour reverted or broken. For a
+     `Never:` check, that behaviour is the code that prevents the failure. An `Unchanged:` check also
+     passes before and after the change. A check that only shows something exists (a file written, a
+     value constructed, a call returning success) does not count.
    - Each task is small enough to finish and verify on its own.
    - A task that depends on an Evidence claim tagged `assumption` starts by measuring it. If the
      measurement contradicts the claim, the outcome decides: correct the task in place, with an indented

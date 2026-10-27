@@ -4,7 +4,9 @@
 
 Format: `- [ ] T### [P?] [O#,...] Description with file path`. `[P]` marks a task that can run in
 parallel with its neighbours; `[O#]` names the outcomes it serves. A task that proves an outcome names
-the check it adds or runs.
+the check it adds or runs. The task that completes a check's change carries an indented line saying how
+the check was seen failing: what was reverted or broken, and the assertion that failed. A compile error,
+a failure elsewhere, or a check that only shows something exists does not count.
 
 ## When to stop and ask
 
@@ -23,7 +25,7 @@ answered question is not asked again.
 
 ## [Group name, e.g. the first outcome reached end to end]
 
-- [ ] T001 [O1] [Failing test that holds O1, in path/to/test]
+- [ ] T001 [O1] [Test that holds O1, in path/to/test]
 - [ ] T002 [O1] [Change that makes it pass, in path/to/file]
 
 ## Done

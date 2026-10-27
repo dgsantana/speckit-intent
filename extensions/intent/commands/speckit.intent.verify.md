@@ -75,13 +75,16 @@ changes section; edit it directly, and a loosening still needs the user's confir
    - **Partial**: met in part, or proven in a different form than the outcome claims; say which part.
    - **Not run**: and why.
 
-   If the check itself proved wrong (it tests something other than the outcome, or breaks the red-first
-   rule), say so. Red-first: an outcome's check is written before the change and fails without it. An
-   `Unchanged:` check passes before and after the change. A `Never:` check fails before the change when
-   the failure happens today (a bug); when it cannot happen yet, it comes with the change and must
-   exercise the path where the failure would occur. A fix that tightens the check or makes it test the
-   outcome may be made here and run again (see Changing the target). A fix that loosens it (lowers a
-   threshold or drops the outcome) is not made here: judge against the check as written and ask the user.
+   If the check itself proved wrong (it tests something other than the outcome), say so. Seen failing: an
+   automated check this work adds counts once it has been seen to fail on its own assertion, not on a
+   compile error or a failure elsewhere, with the behaviour its outcome names absent or broken: run
+   before the change, or run with that behaviour reverted or broken. For a `Never:` check, that behaviour
+   is the code that prevents the failure. An `Unchanged:` check also passes before and after the change.
+   A check that only shows something exists (a file written, a value constructed, a call returning
+   success) does not count. A check not seen failing (no task note shows it, or this command tightened
+   it) keeps its result and is reported. A fix that tightens the check or makes it test the outcome may
+   be made here and run again (see Changing the target). A fix that loosens it (lowers a threshold or
+   drops the outcome) is not made here: judge against the check as written and ask the user.
 
 4. **Independent check**, only when the input asks for it, since a second agent costs the user tokens;
    never by default or from the `after_implement` hook. If this agent can start a sub-agent with a fresh
@@ -92,9 +95,10 @@ changes section; edit it directly, and a loosening still needs the user's confir
 
 5. Before replacing rows, note each outcome whose current row is Fail and that a task in a Convergence
    group of tasks.md serves: it has already had a fix. Then update the spec's Results: one row per
-   outcome, with the result, the evidence (test or command, numbers, where it ran and what that cannot
-   prove), the code checked (a commit hash, or `uncommitted on <short HEAD>`), the date and checked by
-   (`builder`, `user`, or `builder + independent`). Replace the rows of outcomes checked in this run; keep
+   outcome, with the result, the evidence (test or command, numbers, the task whose note shows it seen
+   failing, where it ran and what that cannot prove), the code checked (a commit hash, or `uncommitted on
+   <short HEAD>`), the date and checked by (`builder`, `user`, or `builder + independent`).
+   Replace the rows of outcomes checked in this run; keep
    the others. A row without a checked-by value was not written by this command: replace it if its outcome
    was checked now, otherwise mark it `not verified`. A re-run after an invalid attempt keeps the valid
    run and says why the earlier one does not count. Below the table, one line per noteworthy finding,

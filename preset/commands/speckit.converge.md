@@ -44,11 +44,13 @@ existing task, no spec, no plan and no code.
 
 4. If nothing is missing, leave tasks.md untouched. Otherwise append a `## Convergence` group (numbered
    `## Convergence 2` and so on if one exists) with one task per gap, continuing the T### sequence, in
-   the same format: `- [ ] T### [O#] Description with file path`, ordered by this rule.
-   Red-first: an outcome's check is written before the change and fails without it. An `Unchanged:`
-   check passes before and after the change. A `Never:` check fails before the change when the failure
-   happens today (a bug); when it cannot happen yet, it comes with the change and must exercise the path
-   where the failure would occur.
+   the same format: `- [ ] T### [O#] Description with file path`, following this rule.
+   Seen failing: an automated check this work adds counts once it has been seen to fail on its own
+   assertion, not on a compile error or a failure elsewhere, with the behaviour its outcome names absent
+   or broken: run before the change, or run with that behaviour reverted or broken. For a `Never:` check,
+   that behaviour is the code that prevents the failure. An `Unchanged:` check also passes before and
+   after the change. A check that only shows something exists (a file written, a value constructed, a
+   call returning success) does not count.
    Add no verification task; verification runs after implementation as a hook.
 
 ## Report

@@ -1,6 +1,6 @@
 # 0008. Failure conditions as Never: outcomes
 
-Status: active
+Status: amended by 0018
 Date: 2026-10-07
 
 ## Intent
