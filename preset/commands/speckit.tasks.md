@@ -82,7 +82,14 @@ changes section; edit it directly, and a loosening still needs the user's confir
      reads it from tasks.md; remove it for a `small` one. Keep the Done section, which says to run
      `__SPECKIT_COMMAND_INTENT_VERIFY__` when the tasks were done outside `implement`.
    - No verification task: `__SPECKIT_COMMAND_INTENT_VERIFY__` runs every outcome's check after
-     implementation, as the intent extension's `after_implement` hook.
+     implementation, as the intent extension's `after_implement` hook. One exception: an outcome
+     checked by a person's observation gets a task naming the observation (what to try, what to look
+     for), since someone has to arrange it.
+   - Checkpoints: when the work is too large for one review at the end, add a line
+     `Checkpoint (user review): <what to try and look at>` after each group a person can try end to
+     end, usually two to four per feature. Building stops there (the "When to stop and ask" section
+     says so) and the user looks before the next group. A look at a checkpoint is recorded under that
+     line; it reduces the review at the end but does not replace the final verification.
 
 4. Every outcome must be served by at least one task, and every task must name an outcome. Report any gap
    rather than inventing work to fill it.

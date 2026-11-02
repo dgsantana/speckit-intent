@@ -23,10 +23,17 @@ and ask the user once, only for: **ambiguity** (an outcome reads two ways that l
 attempts. Decide everything else. Write each answer into the spec, a decision record or the plan; an
 answered question is not asked again.
 
+Also stop at each `Checkpoint (user review):` line: report what the group built and what to try, and
+wait for the user's word before the next group. Record what they saw, with the date and the commit,
+in an indented line under the checkpoint; fix what they raise in the group before going on.
+
 ## [Group name, e.g. the first outcome reached end to end]
 
 - [ ] T001 [O1] [Test that holds O1, in path/to/test]
 - [ ] T002 [O1] [Change that makes it pass, in path/to/file]
+
+<!-- Large features only: a review point after a group a person can try end to end. -->
+Checkpoint (user review): [what to try, and what to look for]
 
 ## Done
 

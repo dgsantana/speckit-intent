@@ -61,7 +61,9 @@ changes section; edit it directly, and a loosening still needs the user's confir
    asking the user to do it or confirm what they saw, recorded with who, when and the artifact (a
    screenshot, a log), checked by `user`. A check too long to repeat here may use this build's own run of
    it, named with where, when and on which code it ran. A check that cannot run at all is Not run, with
-   what is needed.
+   what is needed. A person's observation recorded at a tasks.md checkpoint counts, with that
+   checkpoint's commit: it stands when the commits since did not change what it covered (`git diff
+   <commit> -- <the files it exercised>`); otherwise ask the user to look again at that part only.
 
    Then read the changes under test (`git diff $(git merge-base HEAD <default branch>)`, uncommitted work
    included) and check the Constraints and existing behaviour they touch, including edits that reach
@@ -105,7 +107,9 @@ changes section; edit it directly, and a loosening still needs the user's confir
    including "found, not fixed" gaps and where they belong.
 
 6. Set the spec's `status` from the whole table: `verified` when every outcome's row is Pass, `failed`
-   when none is, `partial` otherwise.
+   when none is, `partial` otherwise. A run at a checkpoint that checks only the outcomes its groups
+   reach writes their rows and leaves `status` as it is; `verified` comes only from a run that checked
+   every outcome on the final code.
 
 7. Correct the spec's Evidence where a claim's tier changed (an assumption now measured, or one found
    wrong). Measurements taken before the change, which motivated it, stay in Evidence; an outcome's
